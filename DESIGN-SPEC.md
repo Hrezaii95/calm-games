@@ -1,98 +1,92 @@
-# Calm Corner — Design Specification v3.0 · "Clay & Ink"
+# Calm Corner — Design Specification v4.0 · "Kitten Cottage"
 
-Binding for every page. v3 replaces v2's "Evening Game Room" after research verdict: v2's heavy shadows (`0 18px 40px rgba(0,0,0,.38)`), brass inlay double-frames, and ambient radial "lamplight" gradients are dated skeuomorphism — the root of the "2000s page" complaint. v3 is **flat, tactile, poster-driven**: near-black warm ink, each game as its own tinted poster tile, crisp hairline borders, zero decorative gradients, modern zero-KB motion. Senior floor unchanged and non-negotiable.
+Binding for every page. v4 replaces v3's dark Clay & Ink with the owner-approved Kitten Cottage direction (mockup B, 2026-07-05): a warm tea-and-biscuit cottage where every game is a soft, squishy pastel tile, an original kitten mascot lives in the shell, and gentle motion runs through the whole app. Cute lives in shape, color, and motion — never in noise. The senior floor is untouchable.
 
 ## 1. Direction
 
-Think **App Store feature tiles, printed on craft paper**. Flat tinted surfaces, one crisp border, large line-art glyph as the poster art, generous type. Variety comes from per-game surface tints — no two adjacent tiles the same color. NO box-shadows anywhere. NO radial/ambient gradients. NO double frames, pips, or vignettes. Motion is physical and brief (spring lift, scroll reveal, page cross-fade).
+**A cozy kitchen table in a storybook cottage.** Light biscuit-cream paper, rounded-everything, chunky tiles with a pressed-cookie bottom bevel, one hand-drawn kitten with a heartbeat of idle animation. Reference genre: cozy mobile puzzle UI (squishy tiles, candy-soft palettes, mascot warmth). All artwork is original — no third-party illustration.
 
 ## 2. Tokens
 
 ```css
 :root{
-  --bg:#1E1B18;            /* page — near-black warm ink */
-  --bar:rgba(30,27,24,.92);/* sticky bar */
-  --text:#F0E9DE;          /* primary on dark ≈12:1 */
-  --muted:#A89F91;         /* secondary on dark ≈6.5:1 — 19px minimum */
-  --line:rgba(240,233,222,.14);       /* resting borders */
-  --line-strong:rgba(240,233,222,.34);/* hover/focus borders */
-  --clay:#C96442;          /* brand accent (links, flourish, selected) */
-  --sand:#FBF7F0;          /* light surface — used SPARINGLY (buttons, big word cards) */
-  --ink-on-sand:#26221E;
+  /* Paper */
+  --paper:#FBF1E3;        /* page background */
+  --paper-deep:#F3E4CE;   /* footer, wells, alt panels */
+  --card:#FFFDF7;         /* stage/word cards on party pages */
+  /* Ink */
+  --ink:#5C4433;          /* primary text ≈7.6:1 on paper */
+  --ink-soft:#8A6F5C;     /* secondary ≈4.6:1 — 19px minimum */
+  --line:rgba(92,68,51,.14);
+  /* Brand */
+  --caramel:#C97B52;      /* primary CTA + focus ring */
+  --caramel-deep:#9E5A38; /* CTA bevel */
+  --on-caramel:#FFF4EA;
+  /* Squishy tile pairs: fill / bevel / ink (ink ≥4.5:1 on fill at ≥18px) */
+  --biscuit:#F2DBBD;   --biscuit-bv:#D3B48C;   --biscuit-ink:#6E4B20;
+  --plum:#E5D3E8;      --plum-bv:#BFA3C4;      --plum-ink:#5C3866;
+  --peach:#F5CCB5;     --peach-bv:#D6A184;     --peach-ink:#7E3F20;
+  --sage:#CFE0CB;      --sage-bv:#A3BC9E;      --sage-ink:#395231;
+  --sky:#CBDCEA;       --sky-bv:#9FB6C9;       --sky-ink:#2F4A61;
+  --rose:#F3CDD3;      --rose-bv:#D19FA8;      --rose-ink:#7E3541;
 
-  /* Per-game poster tiles: --tile (flat surface tint) + --art (glyph & go-line color) */
-  /* mahjong  */ --t-mahjong:#2A342E; --a-mahjong:#9FBFA8;
-  /* 2048     */ --t-2048:#33291F;   --a-2048:#D9A441;
-  /* memory   */ --t-memory:#2F2530; --a-memory:#C49BB8;
-  /* mines    */ --t-mines:#222B33;  --a-mines:#8FB0C9;
-  /* words    */ --t-words:#342620;  --a-words:#D98E5F;
-  /* chess    */ --t-chess:#282833;  --a-chess:#A9A9CE;
-  /* charades */ --t-char:#362320;   --a-char:#D97B62;
-  /* draw     */ --t-draw:#2C2431;   --a-draw:#BB93C9;
-  /* impostor */ --t-imp:#322B1D;    --a-imp:#D4B45A;
-
-  --r-tile:14px; --r-ui:8px;          /* mixed radius: tiles soft, controls sharper */
-  --spring:linear(0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849 31.5%,
-    0.937 38.1%, 0.968 41.8%, 0.991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%, 1.001);
-  --dur:280ms;
-  --serif:Fraunces,"Palatino Linotype","Book Antiqua",Georgia,serif;
-  --sans:Nunito,"Segoe UI",system-ui,sans-serif;
+  --r-tile:20px; --r-ui:14px;   /* everything rounder than v3 */
+  --bevel:5px;                   /* resting bottom bevel */
+  --dur:260ms;
+  --display:'Baloo 2', Nunito, "Segoe UI", system-ui, sans-serif;  /* rounded, chunky, friendly */
+  --sans:Nunito, "Segoe UI", system-ui, sans-serif;
 }
 ```
 
-Body background is FLAT `var(--bg)`. Nothing else.
+Fonts: `assets/fonts/fonts-cute.css` adds self-hosted **Baloo 2** (600, 700, latin woff2, OFL); pages link it AFTER the existing `fonts.css` (Nunito stays the body face). Fraunces is retired from v4 pages but its files remain for anything not yet migrated.
 
-## 3. Typography (self-hosted, offline)
-
-`assets/fonts/fonts.css` + **preload the display font**: `<link rel="preload" href="assets/fonts/fraunces-700italic.woff2" as="font" type="font/woff2" crossorigin>` (the h1 is the LCP element).
+## 3. Typography
 
 | Role | Font | Size | Notes |
-|------|------|------|-------|
-| Display h1 | serif italic 700 | `clamp(44px, 11vw, 96px)` | line-height .96, --text |
-| Section h2 | serif italic 600 | `clamp(28px, 4vw, 40px)` | |
-| Tile title | serif 600 upright | 26px | --text |
-| Big word (party) | serif italic 700 | `clamp(42px, 9vw, 68px)` | --ink-on-sand on --sand |
-| Lead | sans 400 | `clamp(19px, 2.2vw, 22px)` | --muted, max 52ch |
-| Body | sans 400 | **≥20px** primary / ≥19px muted | |
-| Tile description | sans 400 | 19px | rgba(240,233,222,.75) on tile tints |
-| Eyebrow | sans 700 | 13px caps, .16em tracking | --clay — MUST fit ONE line at 375px |
-| Meta chip | sans 600 | 16px | |
+|------|------|------|------|
+| Display h1 | Baloo 2 700 | `clamp(40px, 9vw, 76px)` | line-height 1.04, --ink |
+| Section h2 | Baloo 2 700 | `clamp(26px, 4vw, 38px)` | |
+| Tile title | Baloo 2 600 | 24px | tile-ink color |
+| Big word (party) | Baloo 2 700 | `clamp(40px, 9vw, 64px)` | --ink on --card |
+| Body | Nunito 400 | **≥20px** (secondary ≥19px) | |
+| Buttons/chips | Nunito 700 | ≥18px | |
+| Eyebrow badge | Nunito 700 | 14px | NOT letterspaced caps — v4 uses a soft pill badge: caramel-tinted bg `rgba(201,123,82,.14)`, --caramel text, radius 999 |
 
-## 4. Layout
+## 4. The mascot (original, mandatory element)
 
-**Sticky mini-bar** (mobile + desktop): 52px tall, `position:sticky; top:0`, `background:var(--bar)`, `border-bottom:1px solid var(--line)`. Left: wordmark "Calm Corner" (serif italic 20px). Right: two anchor links "Solo · Together" (sans 600 16px, 48px tap height). No blur, no shadow.
+An original kitten drawn as inline SVG line-art-plus-fill: cream body `#F6E7D3`, caramel patches `#E8B583`, `--ink` 2.5px strokes, big head, triangle ears (peach inner), dot eyes, tiny triangle nose, three whiskers per side, curled tail. Variants: **hero** (sitting, ~140px, waving paw), **mini** (head only, ~36px, in the sticky bar), **sleeping** (footer, closed-eye curl). Idle animation (see §6): blink + tail sway + gentle bob. The mascot appears on the hub AND (mini head in the eyebrow area) on every party page — this is the continuity anchor.
 
-**Hero** (compact on phone): padding 56px→24px top on mobile. Eyebrow ONE line ("WORKS OFFLINE · NO ADS"). h1. Clay flourish SVG (2px stroke, --clay). Lead ≤2 lines mobile.
+## 5. Components
 
-**Tile grid**: desktop `grid-template-columns:repeat(6,1fr)`, gap 18px; featured tile spans 3 cols, normal tiles span 2 (Solo: 1 featured + 4 normal = balanced bento; Together: 1 featured + 3 normal). Mobile (≤640px): single column, gap 14px; **normal tiles switch to horizontal layout** (glyph block 96px square left, text right, min-height 128px) so the page shrinks from 5.6 to ~3.5 screens; featured tiles stay vertical posters (glyph 88px, min-height 240px).
+**Sticky bar** — paper bg `rgba(251,241,227,.94)`, 1px `--line` bottom border; mini mascot head + wordmark in Baloo 2; Solo/Together links as soft pills (hover: biscuit fill).
 
-**Tile anatomy** (`<a class="tile">`): flat `background:var(--tile)`, `border:1.5px solid var(--line)`, `border-radius:var(--r-tile)`, padding 22px. Glyph (line-art SVG, stroke 2.5, color --art; 96px featured / 64px normal desktop). Title → 19px description → meta chip (together only; 1.5px border --line, radius --r-ui) → `.go` ("Play →", sans 700 18px, color --art, margin-top:auto). Whole tile is the tap target.
+**Squishy tile** (`<a class="tile">`) — fill from a tile pair, `2px solid var(--line)` border PLUS `border-bottom: var(--bevel) solid <pair-bv>`, radius `--r-tile`. Contents: glyph (existing line-art symbols recolored to tile-ink) → Baloo title → 18.5px description in tile-ink at 82% → meta chip (party games; 2px line border, radius 999) → "Play →" in tile-ink 700. Hover: `translateY(-4px) rotate(-.6deg)` + bevel grows to 7px. Active: `translateY(2px)` + bevel shrinks to 2px (the squish). Focus: `outline:3px solid var(--caramel); outline-offset:3px`.
 
-**Hover/active** (fine pointers): `transform:translateY(-4px)`; `transition:transform var(--dur) var(--spring), border-color 160ms ease, background 160ms ease`; border-color→--line-strong; background lightens ~4% (pre-computed hover tint per tile is unnecessary — use `filter:brightness(1.12)` NO — filter repaints; instead overlay `::after{inset:0;background:rgba(240,233,222,.04);opacity:0;transition:opacity 160ms}` → opacity 1 on hover; compositor-only). Active: translateY(-1px). **No box-shadow, ever.**
+**Buttons** — primary: caramel fill, on-caramel text, radius 999, min-height 56px, bottom bevel `4px solid var(--caramel-deep)`; press = squish (translateY(2px), bevel 1px). Secondary: paper fill, 2px caramel border, --ink text. Chips: card fill, 2px `--line` border, radius 999, min-height 48px; selected = caramel fill + on-caramel + 700.
 
-**Focus**: `outline:3px solid var(--clay); outline-offset:3px` on every interactive element.
+**Stage/word card (party)** — `--card` fill, `2px solid var(--line)` + `6px` bottom bevel in `--paper-deep`... no: bevel `#E3D2B8`; radius 22px; NO shadows anywhere in v4 (bevels carry all depth).
 
-**Footer**: flat --bg, `border-top:1px solid var(--line)`, credits 17px --muted, links underlined --text, feedback button = sand pill (`--sand` bg, --ink-on-sand text, radius 999, min-height 56px).
+**Lobby pill (all 27 games, identical)** — `position:fixed;left:16px;bottom:16px;z-index:99999; background:#FBF1E3; color:#5C4433; font:700 17px/1 'Baloo 2',Nunito,system-ui; padding:14px 20px; border:2px solid #C97B52; border-bottom-width:4px; border-radius:999px; text-decoration:none; min-height:48px; display:inline-flex; align-items:center;` text `⌂ Lobby`. No shadow.
 
-## 5. Motion (zero-KB, all guarded)
+**Footer** — `--paper-deep`, sleeping-kitten mini SVG beside the credits heading.
 
-1. **Scroll reveal**: `@supports (animation-timeline: view()){ .tile{ animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; } @keyframes reveal{ from{opacity:0; transform:translateY(16px) scale(.985)} to{opacity:1; transform:none} } }` — no IntersectionObserver, silent no-op on old Safari/Firefox mobile.
-2. **Cross-page transitions**: `@view-transition{ navigation:auto }` on the hub AND every game page (party pages natively; fetched games get a tiny injected `<style>` block). Degrades to instant nav where unsupported.
-3. **Spring hover** via `--spring` linear() easing (transform only).
-4. ALL of the above inside `@media (prefers-reduced-motion: no-preference)`. Reduced motion ⇒ static page, instant nav.
+## 6. Motion system ("live" — all inside `@media (prefers-reduced-motion: no-preference)`)
 
-## 6. Accessibility floor (unchanged)
+1. **Mascot idle**: blink `@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%,97%{transform:scaleY(.08)}}` 5s infinite on the eye group (transform-origin center); tail sway ±8° 3.5s ease-in-out alternate (origin at tail base); hero mascot bobs ±3px 4s.
+2. **Floating décor**: 2–3 tiny original paw-print SVGs in the hero, opacity ≤.18, drifting ±10px over 7–9s, mutually offset.
+3. **Tile entrance**: scroll reveal via `animation-timeline: view()` inside `@supports` (pop: opacity 0→1, translateY 14px→0, scale .97→1); no IntersectionObserver.
+4. **Squish interactions**: hover lift+tilt, active press per §5 — `transition: transform var(--dur) cubic-bezier(.34,1.56,.64,1), border-bottom-width 120ms ease` (gentle overshoot spring; literal easing value, never via a custom property — the IACVT trap).
+5. **Cross-page continuity**: every page keeps `@view-transition{navigation:auto}`; v4 pages additionally define `::view-transition-old(root){animation:vt-out 200ms ease both}` / `::view-transition-new(root){animation:vt-in 260ms ease both}` with `@keyframes vt-out{to{opacity:0;transform:translateY(8px)}}` and `@keyframes vt-in{from{opacity:0;transform:translateY(-8px)}}` — the whole app breathes the same way between pages.
+6. Reduced motion ⇒ everything static, instant navigation. No autoplaying sound, no infinite spinners, nothing faster than 120ms.
 
-Body ≥20px (muted ≥19px); tap targets ≥48px, primary ≥56px; whole-tile tap areas; contrast: --text/--bg ≈12:1, --muted/--bg ≈6.5:1, tile titles ≥9:1 on all tints, --art colors ≥3:1 on their tints (graphics) and ≥4.5:1 where used as text ("Play →" at 18px bold — verified per pair); focus visible everywhere; no info by color alone; timers opt-in; no sound.
+## 7. Party-page recipe (charades · draw-guess · impostor · categories · would-you-rather · bingo)
 
-## 7. Party-page recipe (charades / draw-guess / impostor)
+Keep ALL JavaScript, IDs, ARIA, and DOM structure untouched — `<style>` block, font links, and existing inline style attributes only. Apply: paper body (flat `--paper`), §5 stage card + chips + buttons, §3 type (Baloo display via fonts-cute.css + fonts.css both linked), eyebrow soft-pill badge, page accent = one tile pair (charades peach, draw-guess plum, impostor biscuit, categories sage, would-you-rather rose, bingo sky), §5 lobby pill, §6 motion items 4–6 (squish + view-transition pair). Timer/word displays in Baloo 2. Mini mascot head SVG (copy from spec §4 reference markup in the hub) beside the eyebrow.
 
-Keep ALL JS/IDs/DOM untouched. Flat --bg body (REMOVE v2 radial gradients). Stage/word cards: `--sand` surface, `--ink-on-sand` text, 1.5px --line-strong border, radius --r-tile, NO shadow, NO ::before inlay frame. Chips: 1.5px --line border, --text, radius --r-ui, min-height 48px; selected = --clay bg, white text (#FFF7F2), 700. Primary buttons: --sand bg pill? NO — primary = --clay bg, #FFF7F2 text, radius 999, min-height 56px; hover brightness via ::after overlay technique. Secondary: transparent, 1.5px --line-strong border, --text. Page accents: charades --a-char, draw-guess --a-draw, impostor --a-imp (eyebrow + timer color). h1 serif italic --text. Add `@view-transition{navigation:auto}`. Lobby pill per §8.
+## 8. Accessibility floor (unchanged, non-negotiable)
 
-## 8. Lobby pill (all 9 games, identical)
-
-`position:fixed; left:16px; bottom:16px; z-index:99999; background:rgba(30,27,24,.92); color:#F0E9DE; border:1.5px solid rgba(240,233,222,.34); font:700 17px/1 system-ui; padding:14px 18px; border-radius:999px; text-decoration:none; min-height:48px; display:inline-flex; align-items:center;` — NO shadow. Text: `⌂ Lobby`.
+Body ≥20px; secondary ≥19px; tap targets ≥48px, primary ≥56px; whole-tile tap areas; contrast: ink/paper ≈7.6:1, tile inks on fills ≥4.5:1 (pairs in §2 are pre-checked), on-caramel/caramel ≈4.6:1 at ≥18px bold; visible caramel focus rings everywhere; no info by color alone; timers opt-in; no sound.
 
 ## 9. Offline rule (unchanged)
 
-Zero runtime external requests. Self-hosted fonts only. Vendored libs stay. Clickable credit hyperlinks allowed.
+Zero runtime external requests (the conditional Telegram bridge on the hub is the sole, in-Telegram-only exception). Baloo 2 self-hosted. Credit hyperlinks fine.
