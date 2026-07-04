@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Nine Men's Morris</title>
+    <style>
+        @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 400 700; src: url(vendor/fonts/montserrat.woff2) format('woff2'); }
+        @font-face { font-family: 'Roboto Slab'; font-style: normal; font-weight: 100 700; src: url(vendor/fonts/robotoslab.woff2) format('woff2'); }
+    </style>
+<style>@media (prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}</style>
+</head>
+<body onload="initializeGame()">
+
+<div class="header">
+    <span class="turn">Turn : <span id="turn">P1</span></span>
+    <span class="message">Message : <span id="message">Click on empty spot to place your piece</span></span>
+</div>
+<br>
+<div class="mid">
+    <canvas height="550" width="550" id="myCanvas">
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+</div>
+
+<p class="copyright">Copyright &#169 Rahul Yadav
+    <script type="text/javascript">document.write(new Date().getFullYear());</script>
+</p>
+<script src="script.js"></script>
+<a href="../../index.html#games" style="position:fixed;left:16px;bottom:16px;z-index:99999;background:rgba(30,27,24,.92);color:#F0E9DE;font:700 17px/1 system-ui;padding:14px 18px;border-radius:999px;text-decoration:none;border:1.5px solid rgba(240,233,222,.34);min-height:48px;display:inline-flex;align-items:center">⌂ Lobby</a>
+</body>
+</html>

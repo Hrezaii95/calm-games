@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charades — The Calm Corner</title>
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+:root{
+  --bg:#1E1B18;
+  --text:#F0E9DE;
+  --muted:#A89F91;
+  --line:rgba(240,233,222,.14);
+  --line-strong:rgba(240,233,222,.34);
+  --clay:#C96442;
+  --sand:#FBF7F0;
+  --ink-on-sand:#26221E;
+  --a-char:#D97B62;
+  --r-tile:14px; --r-ui:8px;
+  --dur:220ms; --ease:cubic-bezier(.2,.7,.3,1);
+  --serif: Fraunces, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans:  Nunito, "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:400 20px/1.6 var(--sans);
+  min-height:100vh;
+}
+.wrap{max-width:720px;margin:0 auto;padding:24px 24px 120px;text-align:center}
+.eyebrow{font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:14px;color:var(--a-char)}
+h1{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(40px,8vw,64px);line-height:.98;margin:10px 0 8px;color:var(--text)}
+.sub{color:var(--muted);font-size:20px;max-width:44ch;margin:0 auto 26px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:26px}
+.chip{font:600 18px var(--sans);color:var(--text);background:transparent;border:1.5px solid var(--line);
+  border-radius:var(--r-ui);padding:11px 20px;min-height:48px;cursor:pointer;transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.chip[aria-pressed="true"]{background:var(--clay);border-color:var(--clay);color:#FFF7F2;font-weight:700}
+.chip:focus-visible,.btn:focus-visible,.ghost:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+.word-card{position:relative;background:var(--sand);border:1.5px solid var(--line-strong);border-radius:var(--r-tile);
+  padding:56px 24px;margin-bottom:22px;min-height:220px;display:flex;flex-direction:column;justify-content:center;gap:10px;color:var(--ink-on-sand)}
+#word{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(42px,9vw,68px);line-height:1.1;color:var(--ink-on-sand)}
+#cat{color:#5C594E;font-size:18px;font-weight:600}
+.btn{display:inline-block;background:var(--clay);color:#FFF7F2;border:0;font:700 20px var(--sans);
+  padding:18px 34px;min-height:56px;border-radius:999px;cursor:pointer;width:100%;max-width:360px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.1)}
+.ghost{background:transparent;border:1.5px solid var(--line-strong);color:var(--text);font:700 18px var(--sans);
+  padding:12px 22px;min-height:48px;border-radius:999px;cursor:pointer;margin-top:14px;transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.ghost:hover{border-color:var(--clay);color:var(--clay)}
+#timer{font-family:var(--serif);font-style:italic;font-size:44px;font-weight:700;color:var(--a-char);min-height:52px;margin-top:10px}
+.lobby{position:fixed;left:16px;bottom:16px;z-index:99999;background:rgba(30,27,24,.92);color:#F0E9DE;
+  font:700 17px/1 system-ui;padding:14px 18px;border-radius:999px;text-decoration:none;
+  border:1.5px solid rgba(240,233,222,.34);min-height:48px;display:inline-flex;align-items:center}
+.lobby:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.chip,.btn,.ghost{transition:none}}
+@media (prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">Play together · 4+ players</p>
+  <h1>Charades</h1>
+  <p class="sub">Tap for a word, then act it out — no talking, no pointing at objects. Your team guesses.</p>
+
+  <div class="chips" id="cats" role="group" aria-label="Choose categories"></div>
+
+  <div class="word-card">
+    <div id="cat">Ready?</div>
+    <div id="word">Tap the button below</div>
+    <div id="timer" aria-live="polite"></div>
+  </div>
+
+  <button class="btn" id="next">New word</button><br>
+  <button class="ghost" id="timerToggle" aria-pressed="false">Timer: off</button>
+</main>
+<a class="lobby" href="../../index.html#games">⌂ Lobby</a>
+
+<script>
+"use strict";
+const WORDS = {
+  "Actions": ["Fishing","Swimming","Knitting","Painting a wall","Riding a bicycle","Making tea","Sneezing","Shoveling snow","Taking a photo","Ironing a shirt","Rowing a boat","Planting flowers","Washing dishes","Playing piano","Blowing out candles","Walking a dog","Wrapping a gift","Hanging laundry","Directing traffic","Milking a cow","Juggling","Climbing a ladder","Sweeping the floor","Whistling"],
+  "Animals": ["Elephant","Penguin","Kangaroo","Turtle","Rooster","Butterfly","Crab","Owl","Gorilla","Snake","Flamingo","Squirrel","Camel","Frog","Peacock","Woodpecker","Sloth","Dolphin","Bee","Ostrich","Cat","Horse","Chicken","Mouse"],
+  "Jobs": ["Dentist","Barber","Firefighter","Chef","Photographer","Orchestra conductor","Waiter","Farmer","Pilot","Tailor","Fisherman","Painter","Teacher","Surgeon","Mail carrier","Carpenter","Traffic officer","Baker","Shepherd","Magician","Librarian","Mechanic","Gardener","Referee"],
+  "Objects": ["Umbrella","Rocking chair","Telescope","Vacuum cleaner","Typewriter","Wheelbarrow","Alarm clock","Teapot","Ladder","Accordion","Fan","Mirror","Scissors","Candle","Broom","Kettle","Hammock","Binoculars","Suitcase","Lawn mower","Toothbrush","Pillow","Watering can","Slippers"],
+  "Sports": ["Golf","Bowling","Table tennis","Archery","Weightlifting","Skiing","Fencing","Basketball","Swimming race","Boxing","Horse riding","Volleyball","Darts","Gymnastics","Ice skating","Tug of war","Cycling race","High jump","Rowing","Karate","Tennis","Football","Chess match","Marathon"]
+};
+const cats = document.getElementById("cats");
+const active = new Set(Object.keys(WORDS));
+for (const name of Object.keys(WORDS)) {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = name; b.setAttribute("aria-pressed", "true");
+  b.addEventListener("click", () => {
+    const on = b.getAttribute("aria-pressed") === "true";
+    if (on && active.size === 1) return;               // keep at least one category
+    b.setAttribute("aria-pressed", String(!on));
+    if (on) active.delete(name); else active.add(name);
+  });
+  cats.appendChild(b);
+}
+
+const wordEl = document.getElementById("word"), catEl = document.getElementById("cat");
+let recent = [];
+function newWord() {
+  const pool = [];
+  for (const c of active) for (const w of WORDS[c]) if (!recent.includes(w)) pool.push([c, w]);
+  if (pool.length === 0) recent = [];                   // all words used — start over
+  const [c, w] = pool.length ? pool[Math.floor(Math.random() * pool.length)]
+                             : [[...active][0], WORDS[[...active][0]][0]];
+  recent.push(w); if (recent.length > 40) recent.shift();
+  catEl.textContent = c; wordEl.textContent = w;
+  if (timerOn) startTimer();
+}
+document.getElementById("next").addEventListener("click", newWord);
+
+const timerEl = document.getElementById("timer"), toggle = document.getElementById("timerToggle");
+let timerOn = false, tick = null;
+const TIMER_SECONDS = 90;
+function stopTimer(){ clearInterval(tick); tick = null; timerEl.textContent = ""; }
+function startTimer(){
+  stopTimer();
+  let left = TIMER_SECONDS;
+  timerEl.textContent = left + "s";
+  tick = setInterval(() => {
+    left--;
+    timerEl.textContent = left > 0 ? left + "s" : "Time!";
+    if (left <= 0) clearInterval(tick);
+  }, 1000);
+}
+toggle.addEventListener("click", () => {
+  timerOn = !timerOn;
+  toggle.textContent = "Timer: " + (timerOn ? TIMER_SECONDS + "s" : "off");
+  toggle.setAttribute("aria-pressed", String(timerOn));
+  if (!timerOn) stopTimer();
+});
+</script>
+</body>
+</html>

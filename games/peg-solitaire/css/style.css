@@ -1,0 +1,311 @@
+@font-face {
+  font-family: 'Roboto';
+  src: url(../fonts/roboto-regular.woff2);
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url(../fonts/roboto-bold.woff2);
+  font-weight: bold;
+}
+
+:root {
+  --board-size: 90vmin;
+  --peg-size: 0.8;
+  --gap-size: 0.2;
+  --color: #b02626;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  opacity: 0;
+  cursor: default;
+  overflow: hidden;
+  background-color: var(--color);
+  transition: opacity 2s ease;
+}
+
+.visible {
+  opacity: 1;
+}
+
+#outer {
+  display: table;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+#middle {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#inner {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+  font-weight: bold;
+  text-align: center;
+  color: white;
+  font-size: calc(var(--board-size) / 3.75);
+  margin-top: 0;
+  transition: color 0.3s linear;
+} 
+
+.reset {
+  display: inline-grid;
+  place-items: center;
+  width: calc(var(--board-size) / 6.7);
+  height: calc(var(--board-size) / 6.7);
+  background-color: white;
+  border-radius: 50%;
+  vertical-align: middle;
+  transition: background-color 0.3s linear;
+}
+
+.enabled {
+  cursor: pointer;
+}
+
+.enabled > .arrows {
+  transition: opacity 0.2s ease-in-out;
+  opacity: 1;
+}
+
+.arrows {
+  width: calc(var(--board-size) / 10.5);
+  height: calc(var(--board-size) / 10.5);
+  transition: opacity 0.05s ease-in-out;
+  opacity: 0;
+}
+
+.board {
+  display: grid;
+  position: relative;
+  box-sizing: border-box;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: var(--color);
+  width: calc(var(--board-size));
+  height: calc(var(--board-size));
+  padding: calc(var(--gap-size) / 2);
+  gap: var(--gap-size);
+  margin: auto;
+}
+
+.hole, .peg, .peg > div {
+  box-sizing: border-box;
+  width: var(--peg-size);
+  height: var(--peg-size);
+  border-radius: 50%;
+}
+
+.hole {
+  border: 1px solid white;
+  transition: border 0.3s linear;
+}
+
+.peg, .peg > div {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  cursor: pointer;
+  background: white;
+  transition: opacity 0.5s ease-in-out;
+  border: 1px solid whitesmoke;
+}
+
+.peg > div {
+  transition: all 0.2s linear;
+}
+
+.peg::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--board-size) / 7 * -0.1);
+  right: calc(var(--board-size) / 7 * -0.1);
+  top: calc(var(--board-size) / 7 * -0.1);
+  bottom: calc(var(--board-size) / 7 * -0.1);
+}
+
+.zoom > div {
+  transform: scale(1.3);
+}
+
+.move, .move-ai {
+  z-index: 100;
+}
+
+.move-ai {
+  transition: all 0.5s ease-in-out;
+}
+
+.move-ai > div {
+  animation: zoom-ai 0.25s 2 linear forwards alternate;
+}
+
+.settle {
+  transition: all 0.2s ease-in-out;
+}
+
+.invisible {
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+
+.invisible-ai {
+  transition: opacity 0.01s 0.22s ease;
+  opacity: 0;
+}
+
+.hidden, .removed {
+  visibility: hidden;
+} 
+
+.pop {
+  transform: scale(1.2);
+}
+
+.lost {
+  cursor: pointer;
+}
+
+.lost h1, .lost #designed {
+  color: silver !important;
+}
+
+.lost .reset, .lost .peg > div {
+  background: silver !important;
+}
+
+.lost .peg > div, .lost .hole {
+  border: 1px solid silver !important;
+}
+
+.zoom-win > div {
+  animation: zoom-win 0.5s 2 ease-in-out forwards alternate;
+}
+
+.blink {
+  animation: blink 0.25s ease-in-out forwards;
+}
+
+#designed {
+  text-align: center;
+  position: relative;
+  align-self: auto;
+  color: white;
+  font-size: calc(var(--board-size) / 38);
+  margin-top: 10px;
+  transition: color 0.3s linear;
+}
+
+@keyframes zoom-ai {
+
+  0% {
+    transform: scale(1.0);
+  }
+
+  100% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes zoom-win {
+
+  0% {
+    transform: scale(1.0);
+  }
+
+  100% {
+    transform: scale(1.3);
+  }
+}
+
+@keyframes blink {
+
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  } 
+
+  100% {
+    opacity: 1;
+  } 
+}
+
+@media (orientation: landscape) and (max-height: 460px) {
+
+  h1 {
+      display: none;
+  }
+}
+
+@media (max-width: 320px), (max-height: 320px) {
+
+  .board {
+    margin-top: -15px;
+  } 
+}
+
+@media (min-width: 460px) and (min-height: 460px) {
+
+  :root {
+    --board-size-big: 420px;
+  }
+
+  h1 {
+    font-size: 110px;
+  }
+
+  .reset { 
+    width: 60px;
+    height: 60px;
+  }
+
+  .arrows {
+    width: 35px;
+    height: 35px;
+  }
+
+  .board {
+    width: var(--board-size-big);
+    height: var(--board-size-big);
+    padding: calc(var(--board-size-big) / 7 * 0.1);
+    gap: calc(var(--board-size-big) / 7 * 0.2);
+  }
+
+  .hole, .peg, .peg > div {
+    width: calc(var(--board-size-big) / 7 * 0.8);
+    height: calc(var(--board-size-big) / 7 * 0.8);
+  }
+
+  .peg::after {
+    left: calc(var(--board-size-big) / 7 * -0.1);
+    right: calc(var(--board-size-big) / 7 * -0.1);
+    top: calc(var(--board-size-big) / 7 * -0.1);
+    bottom: calc(var(--board-size-big) / 7 * -0.1);
+  }
+
+  #designed {
+    font-size: 11px; 
+    line-height: 0.9;
+  }
+}
+
+.noselect {
+  -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+          -webkit-user-select: none; 
+             -moz-user-select: none; 
+              -ms-user-select: none; 
+                  user-select: none; 
+}

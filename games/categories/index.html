@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Categories — The Calm Corner</title>
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+:root{
+  --bg:#1E1B18;
+  --text:#F0E9DE;
+  --muted:#A89F91;
+  --line:rgba(240,233,222,.14);
+  --line-strong:rgba(240,233,222,.34);
+  --clay:#C96442;
+  --sand:#FBF7F0;
+  --ink-on-sand:#26221E;
+  --a-char:#D97B62;
+  --r-tile:14px; --r-ui:8px;
+  --dur:220ms; --ease:cubic-bezier(.2,.7,.3,1);
+  --serif: Fraunces, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans:  Nunito, "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:400 20px/1.6 var(--sans);
+  min-height:100vh;
+}
+.wrap{max-width:720px;margin:0 auto;padding:24px 24px 120px;text-align:center}
+.eyebrow{font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:14px;color:var(--a-char)}
+h1{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(40px,8vw,64px);line-height:.98;margin:10px 0 8px;color:var(--text)}
+.sub{color:var(--muted);font-size:20px;max-width:48ch;margin:0 auto 26px}
+.word-card{position:relative;background:var(--sand);border:1.5px solid var(--line-strong);border-radius:var(--r-tile);
+  padding:56px 24px;margin-bottom:22px;min-height:220px;display:flex;flex-direction:column;justify-content:center;gap:14px;color:var(--ink-on-sand)}
+#cat{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(34px,7vw,52px);line-height:1.1;color:var(--ink-on-sand)}
+#letterRow{display:flex;align-items:center;justify-content:center;gap:12px}
+#letterLabel{color:#5C594E;font-size:18px;font-weight:600}
+#letter{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(48px,10vw,72px);color:var(--clay);line-height:1}
+#timer{font-family:var(--serif);font-style:italic;font-size:44px;font-weight:700;color:var(--a-char);min-height:52px;margin-top:10px}
+.btn{display:inline-block;background:var(--clay);color:#FFF7F2;border:0;font:700 20px var(--sans);
+  padding:18px 34px;min-height:56px;border-radius:999px;cursor:pointer;width:100%;max-width:360px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.1)}
+.ghost{background:transparent;border:1.5px solid var(--line-strong);color:var(--text);font:700 18px var(--sans);
+  padding:12px 22px;min-height:48px;border-radius:999px;cursor:pointer;margin-top:14px;transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.ghost:hover{border-color:var(--clay);color:var(--clay)}
+.chip:focus-visible,.btn:focus-visible,.ghost:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+.lobby{position:fixed;left:16px;bottom:16px;z-index:99999;background:rgba(30,27,24,.92);color:#F0E9DE;
+  font:700 17px/1 system-ui;padding:14px 18px;border-radius:999px;text-decoration:none;
+  border:1.5px solid rgba(240,233,222,.34);min-height:48px;display:inline-flex;align-items:center}
+.lobby:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.btn,.ghost{transition:none}}
+@media (prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">Play together · 3+ players</p>
+  <h1>Categories</h1>
+  <p class="sub">Everyone writes an answer for the category that starts with the letter shown. Unique answers score a point — matching answers score nothing.</p>
+
+  <div class="word-card">
+    <div id="cat">Ready?</div>
+    <div id="letterRow">
+      <span id="letterLabel">Letter</span>
+      <span id="letter">—</span>
+    </div>
+    <div id="timer" aria-live="polite"></div>
+  </div>
+
+  <button class="btn" id="next">New round</button><br>
+  <button class="ghost" id="timerToggle" aria-pressed="false">Timer: off</button>
+</main>
+<a class="lobby" href="../../index.html#games">⌂ Lobby</a>
+
+<script>
+"use strict";
+const CATEGORIES = [
+  "Fruits","Vegetables","Things in a kitchen","Countries","Cities","Jobs","Animals",
+  "Things that are cold","Things that are round","Board games","Sports","School subjects",
+  "Things you pack for a trip","Drinks","Desserts","Colors","Flowers","Trees",
+  "Things found at the beach","Weather words","Musical instruments","Movie genres",
+  "Things in a garage","Things in a bathroom","Modes of transport","Farm animals",
+  "Things that fly","Superheroes","Cartoon characters","Card games","Breakfast foods",
+  "Things in a backpack","Household chores","Types of shoes","Things at a party",
+  "Ice cream flavors","Things in space","Kitchen appliances","Camping gear",
+  "Things you find in a park","Types of hats","Things that make noise","Names of rivers",
+  "Types of bread","Things in an office","Winter activities","Summer activities",
+  "Things with wheels","Types of pasta"
+];
+const LETTERS = "ABCDEFGHIJKLMNOPRSTUVWY".split(""); // excludes Q, X, Z
+
+const catEl = document.getElementById("cat"), letterEl = document.getElementById("letter");
+let recentCats = [], recentLetters = [];
+
+function pick(list, recent, maxRecent) {
+  const pool = list.filter(item => !recent.includes(item));
+  const choice = pool.length ? pool[Math.floor(Math.random() * pool.length)]
+                             : list[Math.floor(Math.random() * list.length)];
+  recent.push(choice);
+  if (recent.length > maxRecent) recent.shift();
+  return choice;
+}
+
+function newRound() {
+  const cat = pick(CATEGORIES, recentCats, Math.min(15, CATEGORIES.length - 1));
+  const letter = pick(LETTERS, recentLetters, Math.min(6, LETTERS.length - 1));
+  catEl.textContent = cat;
+  letterEl.textContent = letter;
+  if (timerOn) startTimer();
+}
+document.getElementById("next").addEventListener("click", newRound);
+
+const timerEl = document.getElementById("timer"), toggle = document.getElementById("timerToggle");
+let timerOn = false, tick = null;
+const TIMER_SECONDS = 90;
+function stopTimer(){ clearInterval(tick); tick = null; timerEl.textContent = ""; }
+function startTimer(){
+  stopTimer();
+  let left = TIMER_SECONDS;
+  timerEl.textContent = left + "s";
+  tick = setInterval(() => {
+    left--;
+    timerEl.textContent = left > 0 ? left + "s" : "Time!";
+    if (left <= 0) clearInterval(tick);
+  }, 1000);
+}
+toggle.addEventListener("click", () => {
+  timerOn = !timerOn;
+  toggle.textContent = "Timer: " + (timerOn ? TIMER_SECONDS + "s" : "off");
+  toggle.setAttribute("aria-pressed", String(timerOn));
+  if (!timerOn) stopTimer();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!--
+
+Yahtzee Html
+
+Copyright (C) 2025 - Fatih (https://github.com/99fk)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Yahtzee</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cmVjdCB4PSIxIiB5PSIxIiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSIzIiByeT0iMyIgZmlsbD0iI2Y5ZjlmNCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiLz4KICA8Y2lyY2xlIGN4PSI1IiBjeT0iNSIgcj0iMS4yIiBmaWxsPSIjMDAwIi8+CiAgPGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iMS4yIiBmaWxsPSIjMDAwIi8+Cjwvc3ZnPg==">
+<style>
+  :root { --felt:#0f5b2f; --felt-d:#0c4725; --fg:#f5f7fb; --muted:#c6d3e6; --acc:#6ee7ff; --card:#0b321d; --edge:#072816; --die:#f9f9f4; --pip:#121212; --ink:#0a0a0a; }
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.5 ui-sans-serif,system-ui,Segoe UI,Roboto,Ubuntu,Arial;background:radial-gradient(1200px 600px at 20% 0%, var(--felt), var(--felt-d));color:var(--fg)}
+  header{padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.35);backdrop-filter: blur(2px)}
+  h1{margin:0;font-size:20px}
+  .wrap{max-width:1120px;margin:20px auto;padding:0 16px;display:grid;gap:16px;grid-template-columns: 1fr 1fr}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.05));border:1px solid rgba(0,0,0,.45);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.06)}
+  .sub{font-size:12px;color:var(--muted)}
+
+  /* Controls */
+  .controls{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  button, select{padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.25);color:var(--fg);font-weight:700;cursor:pointer}
+  button:hover{background:rgba(0,0,0,.35)}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .badge{display:inline-block;padding:2px 8px;border:1px solid rgba(255,255,255,.18);border-radius:999px;color:#d7f7ff}
+  .stat{color:var(--muted)}
+  .bonus{font-size:12px;color:#fff;opacity:.9;margin-top:6px}
+
+  /* Dice */
+  .dice{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .die{width:76px;height:76px;border-radius:12px;background:radial-gradient(100% 100% at 20% 20%, #fff, var(--die) 60%, #ecebe4 100%);
+       display:grid;place-items:center;position:relative;cursor:pointer;user-select:none;transition:transform .12s ease, box-shadow .12s ease;
+       box-shadow: 0 4px 0 rgba(0,0,0,.35), 0 18px 24px rgba(0,0,0,.35), inset 0 2px 0 #fff9, inset 0 -3px 0 rgba(0,0,0,.2)}
+  .die:hover{transform:translateY(-2px)}
+  .die.held{outline:2px solid var(--acc); box-shadow: 0 4px 0 rgba(0,0,0,.35), 0 22px 30px rgba(0,0,0,.45), inset 0 2px 0 #fff9, inset 0 -3px 0 rgba(0,0,0,.2)}
+  .pipgrid{width:56px;height:56px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:4px}
+  .pip{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #333, var(--pip) 60%, #000);justify-self:center;align-self:center;box-shadow: inset 0 1px 2px rgba(255,255,255,.35)}
+  .die small{position:absolute;bottom:6px;right:8px;color:#eaffff;font-weight:700;font-size:10px;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+  .shake{animation:shake .45s ease}
+  @keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(6deg)}50%{transform:rotate(-5deg)}75%{transform:rotate(4deg)}}
+  .blink{animation:blink .6s ease 2}
+  @keyframes blink{0%,100%{outline-color:transparent}50%{outline:3px solid #ffd166}}
+
+  /* Classic score sheet vibe */
+  table{width:100%;border-collapse:separate;border-spacing:0;border-radius:12px;overflow:hidden;box-shadow: inset 0 1px 0 rgba(255,255,255,.06)}
+  thead th{background:rgba(255,255,255,.06);color:#eef7ff;text-align:left;font-weight:800;border-bottom:2px solid rgba(0,0,0,.5)}
+  th,td{padding:9px 10px;border-bottom:1px dashed rgba(255,255,255,.15)}
+  tbody tr:nth-child(odd) td{background:rgba(255,255,255,.02)}
+  tfoot th, tfoot td{background:rgba(255,255,255,.06);font-weight:800;border-top:2px solid rgba(0,0,0,.5)}
+  td.sel{cursor:pointer}
+  td.lock{color:#a7b6ca}
+  td.me{background:rgba(110,231,255,.08)}
+  td.disabled{opacity:.6;cursor:not-allowed}
+  .note{font-size:12px;color:var(--muted)}
+  .win{font-size:18px;color:#b4ffbf;font-weight:800;margin-top:6px}
+  .aiStatus{font-size:12px;color:#fff;margin-top:6px;opacity:.95}
+.container{max-width:1120px;margin:0 auto;padding:0 16px}
+
+  /* Highlighting for score cells */
+  td.lock{background:rgba(200,50,50,0.25);color:#ffaaaa;font-weight:700;}
+  td.sel{background:rgba(110,231,255,0.18);box-shadow: inset 0 0 0 2px #6ee7ff;}
+  td.disabled{opacity:.4;color:#888;}
+  td.me{background:rgba(110,231,255,0.08);}
+</style>
+<style>@media (prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <h1><span data-i="title">Yahtzee</span></h1>
+    <div class="sub" data-i="subtitle">Click dice to hold. You <b>must roll exactly 3×</b>, then score one category in your column.</div>
+    <div class="controls" style="margin-top:10px">
+      <label class="sub"><span data-i="mode">Mode</span>&nbsp;
+        <select id="modeSel">
+          <option value="hh" data-i="mode_hh">Human vs Human</option>
+          <option value="ha_strong" data-i="mode_ai">Human vs AI</option>
+        </select>
+      </label>
+      <label class="sub"><span data-i="pace">AI pace</span>&nbsp;
+        <select id="speedSel">
+          <option value="slow" data-i="slow">Slow</option>
+          <option value="normal" data-i="normal">Normal</option>
+        </select>
+      </label>
+      <label class="sub"><span data-i="rules">Rules</span>&nbsp;
+        <select id="ruleSel" title="Yahtzee bonus & Joker rule">
+          <option value="std" data-i="rules_std">Standard</option>
+          <option value="yb" data-i="rules_yb">Yahtzee Bonus + Joker</option>
+        </select>
+      </label>
+      <label class="sub"><span data-i="lang">Language</span>&nbsp;
+        <select id="langSel">
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </label>
+      <button id="soundBtn" title="Toggle sound">🔊 Sound: Off</button>
+      <button id="newBtn" title="Start a fresh match" data-i="new">New game</button>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+  <section class="panel">
+    <h3><span data-i="turn">Turn</span>: <span id="playerName">Player 1</span></h3>
+    <div class="dice" id="dice" aria-live="polite"></div>
+    <div class="controls">
+      <button id="rollBtn">Roll (0/3)</button>
+      <button id="resetTurnBtn" title="Clear all holds" data-i="clear">Clear holds</button>
+      <span class="stat">P1: <b id="p0sum">0</b> · P2: <b id="p1sum">0</b></span>
+    </div>
+    <div id="aiStatus" class="aiStatus"></div>
+    <div id="bonusBar" class="bonus"></div>
+    <div class="note" data-i="tip">Tip: Only hold dice you want to keep; unheld dice reroll.</div>
+  </section>
+  <section class="panel">
+    <table id="score">
+      <thead>
+        <tr><th data-i="cat">Category</th><th data-i="p1">Player 1</th><th data-i="p2">Player 2</th></tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr><th data-i="upper">Upper Bonus (≥63 = +35)</th><td id="p0ub">0</td><td id="p1ub">0</td></tr>
+        <tr><th data-i="total">Total</th><td id="p0tot">0</td><td id="p1tot">0</td></tr>
+      </tfoot>
+    </table>
+    <div class="note" data-i="unlock">Scoring unlocks after your <b>3rd roll</b>.</div>
+    <div id="winner" class="win"></div>
+  </section>
+</div>
+<script>
+(function(){
+  // ===== i18n =====
+  var I18N = {
+    en: {
+      title:'Yahtzee', subtitle:'Click dice to hold. You <b>must roll exactly 3×</b>, then score one category in your column.',
+      mode:'Mode', mode_hh:'Human vs Human', mode_ai:'Human vs AI', pace:'AI pace', slow:'Slow', normal:'Normal',
+      rules:'Rules', rules_std:'Standard', rules_yb:'Yahtzee Bonus + Joker', lang:'Language', new:'New game',
+      turn:'Turn', clear:'Clear holds', tip:'Tip: Only hold dice you want to keep; unheld dice reroll.',
+      cat:'Category', p1:'Player 1', p2:'Player 2', upper:'Upper Bonus (≥63 = +35)', total:'Total', unlock:'Scoring unlocks after your <b>3rd roll</b>.',
+      hold:'Hold', draw:'Draw: ', p1w:'🏆 Player 1 wins (', p2w:'🏆 Player 2 wins (', score_now:'Score now', after3:'Scoring after roll #3',
+      ai_holds:'AI holds: ', ai_scores:'AI scores: ', bonus:'Yahtzee bonus', turn_p1:'Player 1', turn_p2:'Player 2', turn_ai:'AI'
+    },
+    de: {
+      title:'Kniffel', subtitle:'Klicke Würfel zum Halten. Du <b>musst genau 3× würfeln</b> und dann eine Kategorie in deiner Spalte werten.',
+      mode:'Modus', mode_hh:'Mensch vs. Mensch', mode_ai:'Mensch vs. KI', pace:'KI-Tempo', slow:'Langsam', normal:'Normal',
+      rules:'Regeln', rules_std:'Standard', rules_yb:'Kniffel-Bonus + Joker', lang:'Sprache', new:'Neues Spiel',
+      turn:'Zug', clear:'Halten löschen', tip:'Tipp: Halte nur die, die du behalten willst; nicht gehaltene werden neu gewürfelt.',
+      cat:'Kategorie', p1:'Spieler 1', p2:'Spieler 2', upper:'Oberer Bonus (≥63 = +35)', total:'Gesamt', unlock:'Wertung nach dem <b>3. Wurf</b>.',
+      hold:'Halten', draw:'Unentschieden: ', p1w:'🏆 Spieler 1 gewinnt (', p2w:'🏆 Spieler 2 gewinnt (', score_now:'Jetzt werten', after3:'Wertung nach dem 3. Wurf',
+      ai_holds:'KI hält: ', ai_scores:'KI wertet: ', bonus:'Kniffel-Bonus', turn_p1:'Spieler 1', turn_p2:'Spieler 2', turn_ai:'KI'
+    }
+  };
+
+  function t(key){ return I18N[state.lang][key] || key; }
+
+  // ===== Categories (static keys) =====
+  var cats = [
+    {k:'Ones', key:'ones'}, {k:'Twos', key:'twos'}, {k:'Threes', key:'threes'},
+    {k:'Fours', key:'fours'}, {k:'Fives', key:'fives'}, {k:'Sixes', key:'sixes'},
+    {k:'Three of a kind', key:'tok'}, {k:'Four of a kind', key:'fok'},
+    {k:'Full House (25)', key:'fh'}, {k:'Small Straight (30)', key:'ss'},
+    {k:'Large Straight (40)', key:'ls'}, {k:'Yahtzee (50)', key:'yahtzee'},
+    {k:'Chance', key:'chance'}
+  ];
+
+  // ===== State =====
+  var state = {
+    player: 0, rolls: 0,
+    dice: [1,1,1,1,1], held: [false,false,false,false,false],
+    used: [Object.create(null), Object.create(null)],
+    scores: [Object.create(null), Object.create(null)],
+    aiEnabled: false, aiLevel: 'strong',
+    speed:'normal', soundOn:false,
+    rules:{ yahtzeeBonus:true, joker:true },
+    ybCount:[0,0], yahtzeeScored:[false,false],
+    lang: 'en'
+  };
+
+  // ===== DOM =====
+  function $(sel){ return document.querySelector(sel); }
+  var diceEl = $('#dice');
+  var rollBtn = $('#rollBtn');
+  var resetTurnBtn = $('#resetTurnBtn');
+  var playerName = $('#playerName');
+  var scoreTBody = $('#score tbody');
+  var winner = $('#winner');
+  var modeSel = $('#modeSel');
+  var speedSel = $('#speedSel');
+  var ruleSel = $('#ruleSel');
+  var langSel = $('#langSel');
+  var newBtn = $('#newBtn');
+  var soundBtn = $('#soundBtn');
+  var aiStatus = $('#aiStatus');
+  var bonusBar = $('#bonusBar');
+
+  // ===== Local Storage =====
+  function saveSettings(){ try{
+    localStorage.setItem('kn_mode', modeSel.value);
+    localStorage.setItem('kn_speed', speedSel.value);
+    localStorage.setItem('kn_rules', ruleSel.value);
+    localStorage.setItem('kn_sound', state.soundOn?'1':'0');
+    localStorage.setItem('kn_lang', state.lang);
+  }catch(e){} }
+  function loadSettings(){
+    try{
+      var m = localStorage.getItem('kn_mode'); if(m) modeSel.value=m;
+      var s = localStorage.getItem('kn_speed'); if(s) speedSel.value=s;
+      var r = localStorage.getItem('kn_rules'); if(r) ruleSel.value=r;
+      var so = localStorage.getItem('kn_sound'); state.soundOn = (so==='1');
+      var L = localStorage.getItem('kn_lang'); if(L) state.lang=L;
+    }catch(e){}
+    state.aiEnabled = modeSel.value.indexOf('ha')===0;
+    state.aiLevel = modeSel.value.indexOf('strong')!==-1?'strong':'weak';
+    state.speed = speedSel.value;
+    var yb = ruleSel.value==='yb'; state.rules.yahtzeeBonus=yb; state.rules.joker=yb;
+    langSel.value = state.lang;
+    updateSoundBtn();
+    applyI18N();
+  }
+
+  // ===== i18n apply =====
+  function applyI18N(){
+    document.querySelectorAll('[data-i]').forEach(function(el){ var k=el.getAttribute('data-i'); el.innerHTML = t(k); });
+    // Update select option texts
+    modeSel.querySelector('[data-i="mode_hh"]').textContent = t('mode_hh');
+    modeSel.querySelector('[data-i="mode_ai"]').textContent = t('mode_ai');
+    speedSel.querySelector('[data-i="slow"]').textContent = t('slow');
+    speedSel.querySelector('[data-i="normal"]').textContent = t('normal');
+    ruleSel.querySelector('[data-i="rules_std"]').textContent = t('rules_std');
+    ruleSel.querySelector('[data-i="rules_yb"]').textContent = t('rules_yb');
+    newBtn.textContent = t('new');
+    resetTurnBtn.textContent = t('clear');
+    playerName.textContent = (state.player===0) ? t('turn_p1') : (state.aiEnabled ? t('turn_ai') : t('turn_p2'));
+    renderScores();
+    updateBonusBar();
+    rollBtn.textContent = (state.rolls? (t('roll')||'Roll') : (t('roll')||'Roll')) + ' ('+state.rolls+'/3)';
+  }
+
+  // ===== Texts shim for roll label =====
+  I18N.en.roll = 'Roll'; I18N.de.roll = 'Würfeln';
+
+  // ===== Events =====
+  modeSel.addEventListener('change', function(){ state.aiEnabled = modeSel.value.indexOf('ha')===0; state.aiLevel = modeSel.value.indexOf('strong')!==-1?'strong':'weak'; saveSettings(); resetGame(); });
+  speedSel.addEventListener('change', function(){ state.speed = speedSel.value; saveSettings(); });
+  ruleSel.addEventListener('change', function(){ var yb = ruleSel.value==='yb'; state.rules.yahtzeeBonus=yb; state.rules.joker=yb; saveSettings(); updateBonusBar(); });
+  langSel.addEventListener('change', function(){ state.lang = langSel.value; saveSettings(); applyI18N(); });
+  newBtn.addEventListener('click', function(){ resetGame(); });
+  soundBtn.addEventListener('click', function(){ state.soundOn=!state.soundOn; try{localStorage.setItem('kn_sound', state.soundOn?'1':'0');}catch(e){} updateSoundBtn(); saveSettings(); });
+
+  function updateSoundBtn(){ soundBtn.textContent = (state.soundOn? '🔊':'🔈') + ' ' + (state.lang==='de'?'Ton: ':'Sound: ') + (state.soundOn?(state.lang==='de'?'An':'On'):(state.lang==='de'?'Aus':'Off')); }
+
+  // ===== Audio (Web Audio API) =====
+  var actx = null;
+  function ensureAudio(){ if(!actx) { try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+  function playDice(){ if(!state.soundOn) return; ensureAudio(); if(!actx) return; 
+    var dur=0.35; var now=actx.currentTime;
+    var buffer = actx.createBuffer(1, actx.sampleRate*dur, actx.sampleRate);
+    var data = buffer.getChannelData(0);
+    for(var i=0;i<data.length;i++){ data[i] = (Math.random()*2-1) * Math.exp(-3*i/data.length); }
+    var src = actx.createBufferSource(); src.buffer=buffer;
+    var bp = actx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=900; bp.Q.value=0.9;
+    var gain = actx.createGain(); gain.gain.setValueAtTime(0.0001, now); gain.gain.exponentialRampToValueAtTime(0.6, now+0.03); gain.gain.exponentialRampToValueAtTime(0.0001, now+dur);
+    src.connect(bp); bp.connect(gain); gain.connect(actx.destination);
+    src.start();
+  }
+
+  // === Independent PRNGs for Human and AI to avoid identical rolls ===
+  function makeRNG(seed){ return function(){ seed = (seed*1664525 + 1013904223) >>> 0; return (seed>>>8)/16777216; }; }
+  var _seedH = (window.crypto&&crypto.getRandomValues)? crypto.getRandomValues(new Uint32Array(1))[0] : (Date.now()>>>0);
+  var _seedA = (window.crypto&&crypto.getRandomValues)? crypto.getRandomValues(new Uint32Array(1))[0]^0x9e3779b9 : ((Date.now()*2654435761)>>>0);
+  var _randH = makeRNG(_seedH);
+  var _randA = makeRNG(_seedA);
+  function rndHumanDie(){ return 1 + Math.floor(_randH()*6); }
+  function rndAIDie(){ return 1 + Math.floor(_randA()*6); }
+
+  function renderDieFace(val){
+    var map = {1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]}[val];
+    var g = document.createElement('div'); g.className='pipgrid';
+    for(var i=1;i<=9;i++){
+      var cell = document.createElement('div');
+      if(map.indexOf(i)!==-1){ var dot = document.createElement('div'); dot.className='pip'; cell.appendChild(dot); }
+      g.appendChild(cell);
+    }
+    return g;
+  }
+
+  function renderDice(){
+    diceEl.innerHTML = '';
+    state.dice.forEach(function(v,i){
+      var d = document.createElement('div');
+      d.className = 'die' + (state.held[i] ? ' held':'' );
+      var face = renderDieFace(v); d.appendChild(face);
+      var tag = document.createElement('small'); tag.textContent = t('hold'); d.appendChild(tag); tag.style.opacity = state.held[i]?1:0;
+      d.onclick = function(){ if(state.rolls>0 && state.rolls<3 && (!state.aiEnabled || state.player===0)) { state.held[i] = !state.held[i]; d.classList.add('blink'); setTimeout(function(){ d.classList.remove('blink'); },500); renderDice(); }};
+      diceEl.appendChild(d);
+    });
+  }
+
+  function sum(arr){ return arr.reduce(function(a,b){return a+b;},0); }
+  function counts(arr){ var c=[0,0,0,0,0,0,0]; arr.forEach(function(v){c[v]++;}); return c; }
+  function isYahtzee(d){ var c=counts(d); for(var i=1;i<=6;i++){ if(c[i]===5) return true; } return false; }
+
+  function scorePreview(key){
+    var d = state.dice; var c = counts(d); var total = sum(d);
+    switch(key){
+      case 'ones': case 'twos': case 'threes': case 'fours': case 'fives': case 'sixes':{
+        var n = {ones:1,twos:2,threes:3,fours:4,fives:5,sixes:6}[key]; return c[n]*n; }
+      case 'tok': return c.some(function(x){return x>=3;}) ? total : 0;
+      case 'fok': return c.some(function(x){return x>=4;}) ? total : 0;
+      case 'fh':  return (c.indexOf(3)!==-1 && c.indexOf(2)!==-1) ? 25 : 0;
+      case 'ss':  return hasStraight(d,4) ? 30 : 0;
+      case 'ls':  return hasStraight(d,5) ? 40 : 0;
+      case 'yahtzee': return c.some(function(x){return x===5;}) ? 50 : 0;
+      case 'chance': return total;
+    }
+    return 0;
+  }
+
+  function hasStraight(d, len){
+    var s = Array.from(new Set(d)).sort(function(a,b){return a-b;});
+    var longest=1, cur=1;
+    for(var i=1;i<s.length;i++){ if(s[i]===s[i-1]+1) cur++; else cur=1; if(cur>longest) longest=cur; }
+    return longest>=len;
+  }
+
+  function renderScores(){
+    scoreTBody.innerHTML='';
+    var labels = {
+      ones: state.lang==='de'?'Einsen':'Ones', twos: state.lang==='de'?'Zweien':'Twos', threes: state.lang==='de'?'Dreien':'Threes',
+      fours: state.lang==='de'?'Vieren':'Fours', fives: state.lang==='de'?'Fünfen':'Fives', sixes: state.lang==='de'?'Sechsen':'Sixes',
+      tok: state.lang==='de'?'Dreierpasch':'Three of a kind', fok: state.lang==='de'?'Viererpasch':'Four of a kind',
+      fh: state.lang==='de'?'Full House (25)':'Full House (25)', ss: state.lang==='de'?'Kleine Straße (30)':'Small Straight (30)',
+      ls: state.lang==='de'?'Große Straße (40)':'Large Straight (40)', yahtzee: state.lang==='de'?'Kniffel (50)':'Yahtzee (50)',
+      chance: state.lang==='de'?'Chance':'Chance'
+    };
+    cats.forEach(function(cat){
+      var tr=document.createElement('tr');
+      var th=document.createElement('th'); th.textContent=labels[cat.key] || cat.k; tr.appendChild(th);
+      [0,1].forEach(function(p){
+        var td=document.createElement('td');
+        var used = state.used[p][cat.key];
+        var isMe = p===state.player;
+        var canScore = (state.rolls===3 && isMe);
+        td.className = (isMe ? 'me ' : '') + (used? 'lock': (canScore?'sel':'disabled'));
+        td.dataset.p = p; td.dataset.key = cat.key;
+        td.textContent = used ? state.scores[p][cat.key] : ((isMe && state.rolls>0) ? scorePreview(cat.key) : '');
+        if(!used && canScore){ td.title = t('score_now'); td.onclick = function(){ chooseCategory(cat.key); }; }
+        if(!used && isMe && !canScore){ td.title = t('after3'); }
+        tr.appendChild(td);
+      });
+      scoreTBody.appendChild(tr);
+    });
+    updateTotals();
+  }
+
+  function updateTotals(){
+    [0,1].forEach(function(p){
+      var upper = ['ones','twos','threes','fours','fives','sixes'].reduce(function(a,k){return a+(state.scores[p][k]||0);},0);
+      var bonus = upper>=63 ? 35 : 0;
+      var yb = (state.rules.yahtzeeBonus? state.ybCount[p]*100 : 0);
+      var total = yb + bonus + cats.reduce(function(a,cat){return a+(state.scores[p][cat.key]||0);},0);
+      document.getElementById('p'+p+'ub').textContent = bonus;
+      document.getElementById('p'+p+'tot').textContent = total;
+      document.getElementById('p'+p+'sum').textContent = total;
+    });
+    updateBonusBar();
+  }
+
+  function updateBonusBar(){
+    var label = (state.lang==='de'? 'Kniffel-Bonus — P1: ':'Yahtzee bonus — P1: ');
+    var sep = state.lang==='de'? ' · P2: ':' · P2: ';
+    bonusBar.textContent = state.rules.yahtzeeBonus ? (label + (state.ybCount[0]*100) + sep + (state.ybCount[1]*100)) : '';
+  }
+
+  function chooseCategory(key){
+    if(state.rolls!==3) return;
+    var p = state.player;
+    if(state.used[p][key]) return;
+    state.used[p][key]=true;
+    var val = scorePreview(key);
+    state.scores[p][key]=val;
+    if(key==='yahtzee'){ state.yahtzeeScored[p] = (val===50); }
+    endTurn();
+  }
+
+  function endTurn(){
+    var allUsed = cats.every(function(cat){return state.used[0][cat.key] && state.used[1][cat.key];});
+    if(allUsed){
+      renderScores();
+      var t0 = +document.getElementById('p0tot').textContent;
+      var t1 = +document.getElementById('p1tot').textContent;
+      winner.textContent = (t0===t1)
+        ? (t('draw') + t0 + ' : ' + t1)
+        : (t0>t1
+            ? (t('p1w') + t0 + ' : ' + t1 + ')')
+            : (t('p2w') + t1 + ' : ' + t0 + ')'));
+      rollBtn.disabled = true; return;
+    }
+    state.player = 1 - state.player;
+    state.rolls = 0;
+    state.held = [false,false,false,false,false];
+    // Optional: neutralize dice visuals so AI doesn't show previous human dice
+    state.dice = [1,1,1,1,1];
+    playerName.textContent = state.player===0 ? t('turn_p1') : (state.aiEnabled? t('turn_ai') : t('turn_p2'));
+    rollBtn.disabled = false;
+    rollBtn.textContent = (t('roll')||'Roll') + ' (0/3)';
+    aiStatus.textContent = '';
+    renderDice();
+    renderScores();
+    if(state.aiEnabled && state.player===1){ aiTurn(); }
+  }
+
+  function roll(){
+    if(state.rolls>=3) return;
+    diceEl.classList.add('shake');
+    playDice();
+    var spins = state.speed==='slow'? 16 : 12;
+    var tmr=0;
+    var temp = setInterval(function(){
+      for(var i=0;i<5;i++) if(!state.held[i]) state.dice[i]=rndHumanDie();
+      renderDice();
+      if(++tmr>=spins){
+        clearInterval(temp);
+        diceEl.classList.remove('shake');
+        state.rolls++;
+        rollBtn.textContent = (t('roll')||'Roll') + ' (' + state.rolls + '/3)';
+        if(state.rolls===3){ rollBtn.disabled = true; }
+        if(state.rules.yahtzeeBonus && isYahtzee(state.dice)){
+          var p=state.player;
+          if(state.used[p]['yahtzee'] && state.yahtzeeScored[p]){ state.ybCount[p]++; updateTotals(); }
+        }
+        renderScores();
+      }
+    }, state.speed==='slow'? 55:40);
+  }
+
+  rollBtn.onclick = roll;
+  resetTurnBtn.onclick = function(){ if(state.rolls>0 && state.rolls<3 && (!state.aiEnabled || state.player===0)){ state.held=[false,false,false,false,false]; renderDice(); } };
+
+  function resetGame(){
+    // reseed PRNGs each new game
+    _seedH = (window.crypto&&crypto.getRandomValues)? crypto.getRandomValues(new Uint32Array(1))[0] : (Date.now()>>>0);
+    _seedA = (window.crypto&&crypto.getRandomValues)? crypto.getRandomValues(new Uint32Array(1))[0]^0x9e3779b9 : ((Date.now()*2654435761)>>>0);
+    _randH = makeRNG(_seedH); _randA = makeRNG(_seedA);
+
+    state.player=0; state.rolls=0; state.dice=[1,1,1,1,1]; state.held=[false,false,false,false,false];
+    state.used=[Object.create(null),Object.create(null)]; state.scores=[Object.create(null),Object.create(null)];
+    state.ybCount=[0,0]; state.yahtzeeScored=[false,false];
+    playerName.textContent= t('turn_p1'); winner.textContent=''; rollBtn.disabled=false; rollBtn.textContent=(t('roll')||'Roll')+' (0/3)'; aiStatus.textContent='';
+    renderDice(); renderScores(); updateBonusBar();
+    if(state.aiEnabled && state.player===1){ aiTurn(); }
+  }
+
+  // ==== AI (strong) with visible steps + early Yahtzee lock-in & Joker rule ====
+  function randDie(){ return rndAIDie(); }
+  function rollUnheld(dice, heldMask){ var out = dice.slice(); for(var i=0;i<5;i++) if(((heldMask>>i)&1)===0) out[i]=rndAIDie(); return out; }
+  function bestHoldMonteCarlo(dice, rollsLeft, usedCatsP, sims){ if(!sims) sims = 350; var bestMask=0, bestScore=-1; for(var mask=0; mask<32; mask++){ var total=0; for(var s=0;s<sims;s++){ var d = rollUnheld(dice, mask); if(rollsLeft>1){ d = rollUnheld(d, mask); } var val = bestCategoryValue(d, usedCatsP); total += val; } var exp = total/sims; if(exp>bestScore){ bestScore=exp; bestMask=mask; } } return bestMask; }
+  function bestCategoryKey(dice, usedCatsP){
+    var bestK=null, best=-1, bestPr= -1;
+    var upperSet = {ones:1,twos:1,threes:1,fours:1,fives:1,sixes:1};
+    for(var i=0;i<cats.length;i++){
+      var key = cats[i].key; if(usedCatsP[key]) continue;
+      var v = scorePreviewForDice(dice, key);
+      var bias = upperSet[key]? 0.2*v : 0; // gentle push towards upper section
+      var score = v + bias;
+      var pr = catPriority(dice, key);
+      if(score>best){ best=score; bestK=key; bestPr=pr; }
+      else if(Math.abs(score-best)<=0.5 && pr>bestPr){ bestK=key; bestPr=pr; }
+    }
+    return bestK||'chance';
+  }
+  function bestCategoryValue(dice, usedCatsP){ var best=0; var upperSet = {ones:1,twos:1,threes:1,fours:1,fives:1,sixes:1}; cats.forEach(function(cat){ if(usedCatsP[cat.key]) return; var v = scorePreviewForDice(dice, cat.key); var bias = upperSet[cat.key]? 0.2*v : 0; if(v+bias>best) best=v+bias; }); return best; }
+  function scorePreviewForDice(dice, key){ var old = state.dice.slice(); state.dice = dice.slice(); var val = scorePreview(key); state.dice = old; return val; }
+  function catPriority(dice, key){
+    // Higher means we prefer this category on ties
+    var c = counts(dice);
+    if(key==='yahtzee') return 100;
+    if(key==='ls') return 90;
+    if(key==='ss') return 80;
+    if(key==='fh') return 70;
+    if(key==='fok'){ var has4=false; for(var i=1;i<=6;i++){ if(c[i]>=4){ has4=true; break; } } return has4?75:60; }
+    if(key==='tok'){ var has3=false; for(var j=1;j<=6;j++){ if(c[j]>=3){ has3=true; break; } } return has3?50:40; }
+    if(key==='chance') return 10;
+    var map={ones:1,twos:2,threes:3,fours:4,fives:5,sixes:6}; if(map[key]){ return 55 + (map[key]===6?5:0) + c[map[key]]*2; }
+    return 0;
+  }
+  function setHeldFromMask(mask){ for(var i=0;i<5;i++){ state.held[i] = ((mask>>i)&1)===1; } renderDice(); Array.from(diceEl.children).forEach(function(el,idx){ if(state.held[idx]){ el.classList.add('blink'); setTimeout(function(){ el.classList.remove('blink'); },500);} }); }
+  function delay(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+
+  function jokerBestKeyForAI(dice, usedCatsP){
+    var v = dice[0]; // all equal
+    var nameByVal = {1:'ones',2:'twos',3:'threes',4:'fours',5:'fives',6:'sixes'};
+    var upperKey = nameByVal[v];
+    if(!usedCatsP[upperKey]) return upperKey; // must use upper if free
+    var candidates = ['ls','ss','fh','fok','tok','chance'];
+    var bestK = 'chance', best = -1;
+    for(var i=0;i<candidates.length;i++){
+      var k = candidates[i];
+      if(usedCatsP[k]) continue;
+      var score = (k==='ls')?40:(k==='ss')?30:(k==='fh')?25:sum(dice);
+      if(score>best){ best=score; bestK=k; }
+    }
+    return bestK;
+  }
+
+  async function aiTurn(){
+    rollBtn.disabled = true;
+    await delay(state.speed==='slow'? 600:400);
+    // Ensure AI doesn't inherit human's last dice: force an immediate first roll
+    if(state.rolls===0){
+      await aiRollOnce();
+      await delay(state.speed==='slow'? 500:300);
+    }
+    while(state.rolls<3){
+      if(isYahtzee(state.dice)){
+        var usedY = state.used[1]['yahtzee'];
+        if(!usedY){ await finalizeAIScore('yahtzee'); return; }
+        else if(state.rules.yahtzeeBonus && state.yahtzeeScored[1]){ state.ybCount[1]++; updateTotals(); var keyJ = jokerBestKeyForAI(state.dice, state.used[1]); await finalizeAIScore(keyJ); return; }
+        else { var keyF = bestCategoryKey(state.dice, state.used[1]); await finalizeAIScore(keyF); return; }
+      }
+      if(state.rolls<2){
+        var mask = bestHoldMonteCarlo(state.dice, 3-state.rolls, state.used[1]);
+        var kept = []; for(var i=0;i<5;i++){ if(((mask>>i)&1)===1) kept.push(i+1); }
+        aiStatus.textContent = (state.lang==='de'? 'KI hält: ':'AI holds: ') + kept.join(', ');
+        setHeldFromMask(mask);
+        await delay(state.speed==='slow'? 800:500);
+      }
+      await aiRollOnce();
+      await delay(state.speed==='slow'? 500:350);
+    }
+    var key = bestCategoryKey(state.dice, state.used[1]);
+    await finalizeAIScore(key);
+  }
+
+  async function finalizeAIScore(key){
+    aiStatus.textContent = (state.lang==='de'? 'KI wertet: ':'AI scores: ') + labelForKey(key);
+    await flashCategoryCell(1, key);
+    state.used[1][key]=true;
+    var val = scorePreview(key);
+    state.scores[1][key]=val;
+    if(key==='yahtzee'){ state.yahtzeeScored[1] = (val===50); }
+    renderScores();
+    await delay(state.speed==='slow'? 700:450);
+    aiStatus.textContent = '';
+    endTurn();
+  }
+
+  function labelForKey(key){
+    var L = state.lang==='de';
+    var map = {
+      ones: L?'Einsen':'Ones', twos:L?'Zweien':'Twos', threes:L?'Dreien':'Threes', fours:L?'Vieren':'Fours', fives:L?'Fünfen':'Fives', sixes:L?'Sechsen':'Sixes',
+      tok: L?'Dreierpasch':'Three of a kind', fok: L?'Viererpasch':'Four of a kind', fh: 'Full House (25)', ss: L?'Kleine Straße (30)':'Small Straight (30)', ls: L?'Große Straße (40)':'Large Straight (40)', yahtzee: L?'Kniffel (50)':'Yahtzee (50)', chance: 'Chance'
+    };
+    return map[key]||key;
+  }
+
+  async function flashCategoryCell(p, key){
+    var tds = scoreTBody.querySelectorAll('td');
+    for(var i=0;i<tds.length;i++){
+      var td = tds[i];
+      if(+td.dataset.p===p && td.dataset.key===key){ td.classList.add('sel'); await delay(450); td.classList.remove('sel'); return; }
+    }
+  }
+
+  async function aiRollOnce(){
+    return new Promise(function(resolve){
+      diceEl.classList.add('shake');
+      playDice();
+      var spins = state.speed==='slow'? 16:12; var spin=0;
+      var temp = setInterval(function(){
+        for(var i=0;i<5;i++) if(!state.held[i]) state.dice[i]=rndHumanDie();
+        renderDice();
+        if(++spin>=spins){
+          clearInterval(temp); diceEl.classList.remove('shake'); state.rolls++; rollBtn.textContent = (t('roll')||'Roll') + ' (' + state.rolls + '/3)'; if(state.rolls===3){ rollBtn.disabled=true; }
+          if(state.rules.yahtzeeBonus && isYahtzee(state.dice)){
+            if(state.used[1]['yahtzee'] && state.yahtzeeScored[1]){ state.ybCount[1]++; updateTotals(); }
+          }
+          renderScores(); resolve();
+        }
+      }, state.speed==='slow'? 55:40);
+    });
+  }
+
+  // init
+  loadSettings();
+  // Default language apply & defaults for selects from storage
+  applyI18N();
+  renderDice();
+  renderScores();
+  updateBonusBar();
+})();
+document.addEventListener("contextmenu", e => e.preventDefault());
+</script>
+<a href="../../index.html#games" style="position:fixed;left:16px;bottom:16px;z-index:99999;background:rgba(30,27,24,.92);color:#F0E9DE;font:700 17px/1 system-ui;padding:14px 18px;border-radius:999px;text-decoration:none;border:1.5px solid rgba(240,233,222,.34);min-height:48px;display:inline-flex;align-items:center">⌂ Lobby</a>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Would You Rather — The Calm Corner</title>
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+:root{
+  --bg:#1E1B18;
+  --text:#F0E9DE;
+  --muted:#A89F91;
+  --line:rgba(240,233,222,.14);
+  --line-strong:rgba(240,233,222,.34);
+  --clay:#C96442;
+  --sand:#FBF7F0;
+  --ink-on-sand:#26221E;
+  --a-draw:#BB93C9;
+  --r-tile:14px; --r-ui:8px;
+  --dur:220ms; --ease:cubic-bezier(.2,.7,.3,1);
+  --serif: Fraunces, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans:  Nunito, "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:400 20px/1.6 var(--sans);
+  min-height:100vh;
+}
+.wrap{max-width:760px;margin:0 auto;padding:24px 24px 120px;text-align:center}
+.eyebrow{font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:14px;color:var(--a-draw)}
+h1{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(40px,8vw,64px);line-height:.98;margin:10px 0 8px;color:var(--text)}
+.sub{color:var(--muted);font-size:20px;max-width:52ch;margin:0 auto 26px}
+.stage{display:flex;flex-direction:column;gap:16px;margin-bottom:22px}
+.option{position:relative;background:var(--sand);border:1.5px solid var(--line-strong);border-radius:var(--r-tile);
+  padding:32px 24px;min-height:150px;display:flex;flex-direction:column;justify-content:center;gap:8px;color:var(--ink-on-sand)}
+.option .tag{font:700 16px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--a-draw)}
+.option .txt{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(24px,5vw,32px);line-height:1.15;color:var(--ink-on-sand)}
+.or{font:700 16px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+@media (min-width:640px){
+  .stage{flex-direction:row;align-items:stretch}
+  .option{flex:1}
+  .or{display:flex;align-items:center;justify-content:center;padding:0 6px}
+}
+.btn{display:inline-block;background:var(--clay);color:#FFF7F2;border:0;font:700 20px var(--sans);
+  padding:18px 34px;min-height:56px;border-radius:999px;cursor:pointer;width:100%;max-width:360px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.1)}
+.btn:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+.lobby{position:fixed;left:16px;bottom:16px;z-index:99999;background:rgba(30,27,24,.92);color:#F0E9DE;
+  font:700 17px/1 system-ui;padding:14px 18px;border-radius:999px;text-decoration:none;
+  border:1.5px solid rgba(240,233,222,.34);min-height:48px;display:inline-flex;align-items:center}
+.lobby:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}}
+@media (prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">Play together · 3+ players</p>
+  <h1>Would You Rather</h1>
+  <p class="sub">Read the question aloud. Everyone picks a side — A or B — then take turns defending your choice.</p>
+
+  <div class="stage">
+    <div class="option">
+      <span class="tag">Option A</span>
+      <span class="txt" id="optA">Tap the button below</span>
+    </div>
+    <div class="or">or</div>
+    <div class="option">
+      <span class="tag">Option B</span>
+      <span class="txt" id="optB">to begin</span>
+    </div>
+  </div>
+
+  <button class="btn" id="next">Next question</button>
+</main>
+<a class="lobby" href="../../index.html#games">⌂ Lobby</a>
+
+<script>
+"use strict";
+const PAIRS = [
+  ["Always have summer weather","Always have spring weather"],
+  ["Never wait in line again","Never lose your keys again"],
+  ["Have a garden that never needs weeding","Have a car that never needs washing"],
+  ["Always know the right thing to say","Always know the right thing to do"],
+  ["Take naps that always feel refreshing","Have coffee that always tastes perfect"],
+  ["Never run out of your favorite book","Never run out of your favorite snack"],
+  ["Live somewhere with mild winters","Live somewhere with mild summers"],
+  ["Always find a good parking spot","Always find a good seat"],
+  ["Have a hammock in every backyard","Have a porch swing on every porch"],
+  ["Never get a paper cut again","Never stub your toe again"],
+  ["Always wake up before your alarm","Always fall asleep the moment you lie down"],
+  ["Have perfect handwriting","Have a perfect memory for names"],
+  ["Get to relive one favorite trip","Get to plan one brand-new trip, fully paid"],
+  ["Have a bottomless bird feeder","Have a bottomless fruit bowl"],
+  ["Always have fresh-baked bread at home","Always have fresh-cut flowers at home"],
+  ["Know exactly when it will rain","Know exactly when it will be sunny"],
+  ["Never lose a game of cards again","Never lose the TV remote again"],
+  ["Have a house with a porch","Have a house with a big backyard"],
+  ["Always get the crossword answer instantly","Always win at trivia night"],
+  ["Have a lifetime supply of stamps","Have a lifetime supply of greeting cards"],
+  ["Take one long walk every day","Take three short walks every day"],
+  ["Always have the right umbrella on hand","Always have the right sweater on hand"],
+  ["Get a new houseplant every month","Get a new photo album every month"],
+  ["Have Sunday dinners with family every week","Have a game night with friends every week"],
+  ["Always find the best deal at the store","Always find a good parking spot at the store"],
+  ["Never forget a birthday again","Never forget an appointment again"],
+  ["Have a kitchen that always smells like cookies","Have a kitchen that always smells like coffee"],
+  ["Only ever watch classic movies","Only ever listen to classic music"],
+  ["Always have the newspaper delivered warm from the sun","Always have your coffee at the perfect temperature"],
+  ["Be excellent at chess","Be excellent at cards"],
+  ["Have a garden full of vegetables","Have a garden full of flowers"],
+  ["Get to pick the restaurant every time","Get to pick the movie every time"],
+  ["Always have neat handwriting on cards","Always remember everyone's birthday"],
+  ["Live near the mountains","Live near the sea"],
+  ["Have an extra hour every morning","Have an extra hour every evening"],
+  ["Always find loose change on the ground","Always find a good parking spot downtown"],
+  ["Never have a bad hair day","Never have a wrinkled shirt"],
+  ["Have a porch that faces the sunrise","Have a porch that faces the sunset"],
+  ["Be able to fix anything around the house","Be able to grow anything in the garden"],
+  ["Take the scenic route everywhere","Take the fastest route everywhere"],
+  ["Always have the right recipe on hand","Always have the right tool on hand"],
+  ["Get to relive your favorite year","Get to skip ahead and see next year"],
+  ["Have a puzzle that never runs out of pieces","Have a deck of cards that never gets lost"],
+  ["Wake up to birdsong every morning","Wake up to the smell of fresh bread every morning"],
+  ["Never misplace your glasses again","Never misplace your phone again"],
+  ["Always have the perfect nap spot","Always have the perfect reading chair"],
+  ["Have unlimited postage stamps","Have unlimited notebook paper"],
+  ["Host the holidays every year","Travel somewhere new every holiday"],
+  ["Always get a table by the window","Always get a table near the fireplace"],
+  ["Have a clock that's always exactly right","Have a calendar that's always up to date"]
+];
+
+const optA = document.getElementById("optA"), optB = document.getElementById("optB");
+let recent = [];
+function newQuestion() {
+  const pool = [];
+  for (let i = 0; i < PAIRS.length; i++) if (!recent.includes(i)) pool.push(i);
+  const idx = pool.length ? pool[Math.floor(Math.random() * pool.length)]
+                          : Math.floor(Math.random() * PAIRS.length);
+  recent.push(idx);
+  if (recent.length > Math.min(20, PAIRS.length - 1)) recent.shift();
+  const [a, b] = PAIRS[idx];
+  optA.textContent = a;
+  optB.textContent = b;
+}
+document.getElementById("next").addEventListener("click", newQuestion);
+</script>
+</body>
+</html>

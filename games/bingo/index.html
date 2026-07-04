@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bingo Caller — The Calm Corner</title>
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+:root{
+  --bg:#1E1B18;
+  --text:#F0E9DE;
+  --muted:#A89F91;
+  --line:rgba(240,233,222,.14);
+  --line-strong:rgba(240,233,222,.34);
+  --clay:#C96442;
+  --sand:#FBF7F0;
+  --ink-on-sand:#26221E;
+  --a-imp:#D4B45A;
+  --r-tile:14px; --r-ui:8px;
+  --dur:220ms; --ease:cubic-bezier(.2,.7,.3,1);
+  --serif: Fraunces, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans:  Nunito, "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:400 20px/1.6 var(--sans);
+  min-height:100vh;
+}
+.wrap{max-width:720px;margin:0 auto;padding:24px 24px 120px;text-align:center}
+.eyebrow{font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:14px;color:var(--a-imp)}
+h1{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(40px,8vw,64px);line-height:.98;margin:10px 0 8px;color:var(--text)}
+.sub{color:var(--muted);font-size:20px;max-width:50ch;margin:0 auto 22px}
+
+.stage{position:relative;background:var(--sand);border:1.5px solid var(--line-strong);border-radius:var(--r-tile);
+  padding:34px 24px;margin-bottom:18px;min-height:170px;display:flex;flex-direction:column;justify-content:center;gap:6px;color:var(--ink-on-sand)}
+#callLabel{color:#5C594E;font-size:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+#call{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(52px,13vw,88px);line-height:1;color:var(--ink-on-sand)}
+#callMeta{color:#5C594E;font-size:17px;font-weight:600}
+
+.controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:26px}
+.btn{display:inline-block;background:var(--clay);color:#FFF7F2;border:0;font:700 20px var(--sans);
+  padding:18px 34px;min-height:56px;border-radius:999px;cursor:pointer;width:100%;max-width:360px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.1)}
+.ghost{background:transparent;border:1.5px solid var(--line-strong);color:var(--text);font:700 18px var(--sans);
+  padding:12px 22px;min-height:48px;border-radius:999px;cursor:pointer;transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.ghost:hover{border-color:var(--clay);color:var(--clay)}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.btn:focus-visible,.ghost:focus-visible,.num:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+
+.status{color:var(--muted);font-size:19px;margin-bottom:22px}
+
+.board{border:1.5px solid var(--line);border-radius:var(--r-tile);padding:14px;text-align:left}
+.boardhead{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px}
+.boardhead span{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;text-align:center;color:var(--a-imp)}
+.boardgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.col{display:flex;flex-direction:column;gap:6px}
+.num{position:relative;display:flex;align-items:center;justify-content:center;min-height:48px;
+  font:600 17px var(--sans);color:var(--text);border:1.5px solid var(--line);border-radius:var(--r-ui);
+  background:transparent;cursor:default}
+.num.called{background:var(--clay);border-color:var(--clay);color:#FFF7F2;font-weight:700;text-decoration:line-through;text-decoration-thickness:2px}
+
+.lobby{position:fixed;left:16px;bottom:16px;z-index:99999;background:rgba(30,27,24,.92);color:#F0E9DE;
+  font:700 17px/1 system-ui;padding:14px 18px;border-radius:999px;text-decoration:none;
+  border:1.5px solid rgba(240,233,222,.34);min-height:48px;display:inline-flex;align-items:center}
+.lobby:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.btn,.ghost{transition:none}}
+@media (prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+@media (max-width:480px){
+  .boardhead span{font-size:17px}
+  .num{font-size:14px;min-height:40px}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">Play together · Host + any players · Paper cards</p>
+  <h1>Bingo Caller</h1>
+  <p class="sub">The host calls numbers aloud one at a time. Players mark matches on their paper cards — five in a row wins.</p>
+
+  <div class="stage">
+    <div id="callLabel">Current call</div>
+    <div id="call">—</div>
+    <div id="callMeta">Tap "Call next" to begin</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="callNext">Call next</button>
+  </div>
+  <p class="status" id="status" aria-live="polite">0 of 75 numbers called</p>
+
+  <div class="board" id="board" aria-label="All 75 bingo numbers, called numbers marked"></div>
+
+  <div class="controls" style="margin-top:26px">
+    <button class="ghost" id="reset">New game</button>
+  </div>
+</main>
+<a class="lobby" href="../../index.html#games">⌂ Lobby</a>
+
+<script>
+"use strict";
+const LETTERS = ["B","I","N","G","O"];
+const RANGES = [[1,15],[16,30],[31,45],[46,60],[61,75]];
+
+const boardEl = document.getElementById("board");
+const head = document.createElement("div");
+head.className = "boardhead";
+for (const l of LETTERS) {
+  const s = document.createElement("span");
+  s.textContent = l;
+  head.appendChild(s);
+}
+boardEl.appendChild(head);
+
+const grid = document.createElement("div");
+grid.className = "boardgrid";
+const cellByNumber = {};
+for (let c = 0; c < 5; c++) {
+  const col = document.createElement("div");
+  col.className = "col";
+  const [lo, hi] = RANGES[c];
+  for (let n = lo; n <= hi; n++) {
+    const cell = document.createElement("div");
+    cell.className = "num";
+    cell.textContent = String(n);
+    col.appendChild(cell);
+    cellByNumber[n] = cell;
+  }
+  grid.appendChild(col);
+}
+boardEl.appendChild(grid);
+
+const callEl = document.getElementById("call"), callMetaEl = document.getElementById("callMeta");
+const statusEl = document.getElementById("status");
+const callNextBtn = document.getElementById("callNext");
+
+let remaining = [];
+let calledCount = 0;
+
+function letterFor(n) {
+  for (let i = 0; i < RANGES.length; i++) {
+    if (n >= RANGES[i][0] && n <= RANGES[i][1]) return LETTERS[i];
+  }
+  return "";
+}
+
+function resetGame() {
+  remaining = [];
+  for (let n = 1; n <= 75; n++) remaining.push(n);
+  calledCount = 0;
+  for (const n in cellByNumber) cellByNumber[n].classList.remove("called");
+  callEl.textContent = "—";
+  callMetaEl.textContent = "Tap “Call next” to begin";
+  statusEl.textContent = "0 of 75 numbers called";
+  callNextBtn.disabled = false;
+  callNextBtn.textContent = "Call next";
+}
+
+function callNextNumber() {
+  if (remaining.length === 0) return;
+  const idx = Math.floor(Math.random() * remaining.length);
+  const n = remaining.splice(idx, 1)[0];
+  calledCount++;
+  const letter = letterFor(n);
+  callEl.textContent = letter + "-" + n;
+  callMetaEl.textContent = calledCount === 1 ? "First call" : "Call #" + calledCount;
+  cellByNumber[n].classList.add("called");
+  statusEl.textContent = calledCount + " of 75 numbers called";
+  if (remaining.length === 0) {
+    callNextBtn.disabled = true;
+    callNextBtn.textContent = "All numbers called";
+    callMetaEl.textContent = "Every number has been called";
+  }
+}
+
+callNextBtn.addEventListener("click", callNextNumber);
+document.getElementById("reset").addEventListener("click", () => {
+  if (calledCount === 0 || confirm("Start a new game? This clears all called numbers.")) {
+    resetGame();
+  }
+});
+
+resetGame();
+</script>
+</body>
+</html>

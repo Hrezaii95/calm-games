@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Calm Corner — twenty-seven gentle games</title>
+<meta name="description" content="Gentle puzzles to play alone, and easy games to play together. No ads, no accounts, no time pressure. Works entirely offline.">
+<link rel="preload" href="assets/fonts/fraunces-700italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<script>
+(function(){
+  if (!/tgWebApp/.test(location.hash) && !/tgWebApp/.test(location.search)) return;
+  var s = document.createElement('script');
+  s.src = 'https://telegram.org/js/telegram-web-app.js';
+  s.onload = function(){
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if (!tg) return;
+    tg.ready(); tg.expand();
+    if (tg.setHeaderColor) tg.setHeaderColor('#1E1B18');
+    if (tg.setBackgroundColor) tg.setBackgroundColor('#1E1B18');
+  };
+  document.head.appendChild(s);
+})();
+</script>
+<style>
+:root{
+  --bg:#1E1B18; --bar:rgba(30,27,24,.92);
+  --text:#F0E9DE; --muted:#A89F91;
+  --line:rgba(240,233,222,.14); --line-strong:rgba(240,233,222,.34);
+  --clay:#C96442; --sand:#FBF7F0; --ink-on-sand:#26221E;
+  --t-mahjong:#2A342E; --a-mahjong:#9FBFA8;
+  --t-2048:#33291F;   --a-2048:#D9A441;
+  --t-memory:#2F2530; --a-memory:#C49BB8;
+  --t-mines:#222B33;  --a-mines:#8FB0C9;
+  --t-words:#342620;  --a-words:#D98E5F;
+  --t-chess:#282833;  --a-chess:#A9A9CE;
+  --t-char:#362320;   --a-char:#D97B62;
+  --t-draw:#2C2431;   --a-draw:#BB93C9;
+  --t-imp:#322B1D;    --a-imp:#D4B45A;
+  --t-cards:#26322B;  --a-cards:#93C4A5;
+  --t-sea:#1F2C38;    --a-sea:#7FB3D1;
+  --t-dice:#33301F;   --a-dice:#CFC066;
+  --t-snake:#273322;  --a-snake:#A4C87F;
+  --t-wood:#342B22;   --a-wood:#C99B6A;
+  --t-rose:#33232A;   --a-rose:#CE8FA6;
+  --r-tile:14px; --r-ui:8px;
+  --dur:280ms;
+  --serif:Fraunces,"Palatino Linotype","Book Antiqua",Georgia,serif;
+  --sans:Nunito,"Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+::selection{background:var(--clay);color:#FFF7F2}
+body{background:var(--bg);color:var(--text);font:400 20px/1.6 var(--sans)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+a{color:inherit}
+.bar{position:sticky;top:0;z-index:100;background:var(--bar);border-bottom:1px solid var(--line)}
+.bar-in{display:flex;align-items:center;justify-content:space-between;min-height:52px}
+.wordmark{font:italic 600 20px var(--serif);text-decoration:none}
+.bar-nav{display:flex;gap:4px}
+.bar-nav a{font:600 16px var(--sans);color:var(--muted);text-decoration:none;padding:12px 14px;border-radius:var(--r-ui)}
+.bar-nav a:hover{color:var(--text)}
+.bar-nav a:focus-visible,.wordmark:focus-visible{outline:3px solid var(--clay);outline-offset:2px}
+header.hero{padding:clamp(28px,6vw,72px) 0 8px}
+.eyebrow{font:700 13px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--clay);white-space:nowrap}
+h1{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(44px,11vw,96px);line-height:.96;margin:10px 0 2px;text-wrap:balance}
+.flourish{display:block;width:min(420px,72%);height:14px;margin:4px 0 18px}
+.lead{max-width:52ch;color:var(--muted);font-size:clamp(19px,2.2vw,22px)}
+section{padding:30px 0 4px;scroll-margin-top:64px}
+.s-head{display:flex;align-items:baseline;gap:14px;margin-bottom:4px}
+h2{font-family:var(--serif);font-style:italic;font-weight:600;font-size:clamp(28px,4vw,40px)}
+.s-head .count{font:600 16px var(--sans);color:var(--muted)}
+.rule{height:1px;background:linear-gradient(90deg,var(--line-strong),transparent);margin:10px 0 0}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;padding:22px 0 26px}
+.w4{grid-column:span 4}.w3{grid-column:span 3}.w2{grid-column:span 2}
+.tile{position:relative;display:flex;flex-direction:column;gap:8px;background:var(--tile);color:var(--text);
+  border:1.5px solid var(--line);border-radius:var(--r-tile);padding:22px;min-height:210px;
+  text-decoration:none;overflow:hidden}
+.tile::after{content:"";position:absolute;inset:0;background:rgba(240,233,222,.05);opacity:0;pointer-events:none}
+.tile .glyph{width:56px;height:56px;color:var(--art);flex:none}
+.tile.featured{min-height:280px}
+.tile.featured .glyph{width:96px;height:96px}
+.tile h3{font-family:var(--serif);font-weight:600;font-size:25px;margin-top:4px}
+.tile p{color:rgba(240,233,222,.75);font-size:18.5px;line-height:1.5}
+.tile .meta{font:600 15px var(--sans);border:1.5px solid var(--line);border-radius:var(--r-ui);
+  padding:4px 11px;align-self:flex-start;color:rgba(240,233,222,.85)}
+.tile .go{margin-top:auto;padding-top:10px;font:700 17px var(--sans);color:var(--art)}
+.tile:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+footer{border-top:1px solid var(--line);margin-top:40px;padding:44px 0 72px;color:var(--muted);font-size:17px}
+footer h2{font-size:24px;margin-bottom:12px}
+footer ul{list-style:none;display:grid;gap:6px;margin:0 0 24px;padding:0}
+footer a{color:var(--text);text-underline-offset:3px}
+.btn{display:inline-flex;align-items:center;background:var(--sand);color:var(--ink-on-sand);
+  font:700 18px var(--sans);padding:15px 26px;min-height:56px;border-radius:999px;text-decoration:none}
+.btn:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+@media (max-width:640px){
+  .grid{grid-template-columns:1fr;gap:14px}
+  .w4,.w3,.w2{grid-column:auto}
+  .tile:not(.featured){flex-direction:row;align-items:center;gap:16px;min-height:120px;padding:18px}
+  .tile:not(.featured) .glyph{width:52px;height:52px}
+  .tile:not(.featured) .t-body{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .tile:not(.featured) h3{margin-top:0;font-size:23px}
+  .tile:not(.featured) p{font-size:17px;color:rgba(240,233,222,.72)}
+  .tile:not(.featured) .go{margin-top:2px;padding-top:0}
+  .tile:not(.featured) .meta{margin-top:2px}
+  .tile.featured{min-height:240px}
+  .tile.featured .glyph{width:80px;height:80px}
+}
+@media (min-width:641px){
+  .t-body{display:contents}
+}
+@media (prefers-reduced-motion:no-preference){
+  .tile{transition:transform var(--dur) cubic-bezier(.2,.7,.3,1),border-color 160ms ease}
+  @supports (transition-timing-function: linear(0, 1)){
+    .tile{transition:transform var(--dur) linear(0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849 31.5%, 0.937 38.1%, 0.968 41.8%, 0.991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%, 1.001),border-color 160ms ease}
+  }
+  .tile::after{transition:opacity 160ms ease}
+  .tile:hover{transform:translateY(-4px);border-color:var(--line-strong)}
+  .tile:hover::after{opacity:1}
+  .tile:active{transform:translateY(-1px)}
+  @supports (animation-timeline: view()){
+    .tile{animation:reveal linear both;animation-timeline:view();animation-range:entry 0% entry 55%}
+    @keyframes reveal{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+  }
+  @view-transition{navigation:auto}
+}
+</style>
+</head>
+<body>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="g-mahjong" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="15" y="8" width="34" height="48" rx="6"/><circle cx="32" cy="32" r="7"/>
+    <circle cx="23.5" cy="18.5" r="1.8"/><circle cx="40.5" cy="18.5" r="1.8"/>
+    <circle cx="23.5" cy="45.5" r="1.8"/><circle cx="40.5" cy="45.5" r="1.8"/>
+  </symbol>
+  <symbol id="g-2048" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="12" y="12" width="17" height="17" rx="4"/><rect x="35" y="12" width="17" height="17" rx="4"/>
+    <rect x="12" y="35" width="17" height="17" rx="4"/><rect x="35" y="35" width="17" height="17" rx="4" fill="currentColor" fill-opacity=".28"/>
+    <path d="M40 43.5h7"/><path d="M43.5 40v7"/>
+  </symbol>
+  <symbol id="g-memory" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="10" y="14" width="24" height="34" rx="4" transform="rotate(-8 22 31)"/>
+    <rect x="28" y="16" width="24" height="34" rx="4" transform="rotate(7 40 33)"/>
+    <circle cx="41" cy="33" r="4.5"/>
+  </symbol>
+  <symbol id="g-mines" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M24 48V10"/><path d="M24 12l19 8-19 8z" fill="currentColor" fill-opacity=".28"/>
+    <path d="M13 53q19-9 38 0"/>
+  </symbol>
+  <symbol id="g-search" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="27" cy="27" r="15"/><path d="M38 38l13 13"/>
+    <circle cx="21" cy="22" r="1.6"/><circle cx="32" cy="22" r="1.6"/><circle cx="21" cy="32" r="1.6"/><circle cx="32" cy="32" r="1.6"/>
+  </symbol>
+  <symbol id="g-chess" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="32" cy="19" r="8"/><path d="M27 27q1 11-6 19h22q-7-8-6-19"/><path d="M18 52h28"/>
+  </symbol>
+  <symbol id="g-mask" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 11q14-5 28 0 2 16-2 26-5 12-12 12t-12-12q-4-10-2-26z"/>
+    <path d="M24 25q3-3 6 0"/><path d="M36 25q3-3 6 0"/><path d="M25 36q7 7 14 0"/>
+  </symbol>
+  <symbol id="g-pencil" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M41 9l14 14-26 26-17 4 4-17z"/><path d="M36 14l14 14"/><path d="M8 58q9-7 17-1"/>
+  </symbol>
+  <symbol id="g-spy" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 32h36"/><path d="M20 32q-1-18 12-18t12 18"/>
+    <circle cx="24" cy="46" r="6"/><circle cx="40" cy="46" r="6"/><path d="M30 46h4"/>
+  </symbol>
+  <symbol id="g-cards" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="12" y="12" width="26" height="36" rx="4"/>
+    <rect x="26" y="18" width="26" height="36" rx="4" fill="currentColor" fill-opacity=".12"/>
+    <path d="M39 30l4 5-4 5-4-5z"/>
+  </symbol>
+  <symbol id="g-c4" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="10" y="16" width="44" height="38" rx="6"/>
+    <circle cx="22" cy="30" r="4"/><circle cx="32" cy="30" r="4"/><circle cx="42" cy="30" r="4"/>
+    <circle cx="22" cy="42" r="4" fill="currentColor" fill-opacity=".28"/><circle cx="32" cy="42" r="4"/><circle cx="42" cy="42" r="4"/>
+  </symbol>
+  <symbol id="g-15" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="12" y="12" width="40" height="40" rx="6"/>
+    <path d="M25.3 12v40"/><path d="M38.6 12v40"/><path d="M12 25.3h40"/><path d="M12 38.6h26.6"/>
+  </symbol>
+  <symbol id="g-crate" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="16" y="20" width="24" height="24" rx="3"/><path d="M16 20l24 24"/><path d="M40 20L16 44"/>
+    <path d="M46 32h8"/><path d="M50 28l4 4-4 4"/>
+  </symbol>
+  <symbol id="g-scramble" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="10" y="26" width="15" height="15" rx="3" transform="rotate(-8 17.5 33.5)"/>
+    <rect x="25" y="22" width="15" height="15" rx="3" transform="rotate(6 32.5 29.5)"/>
+    <rect x="41" y="27" width="15" height="15" rx="3" transform="rotate(-4 48.5 34.5)"/>
+    <path d="M20 48q12 6 24 0"/>
+  </symbol>
+  <symbol id="g-lights" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="13" y="13" width="11" height="11" rx="2"/><rect x="27" y="13" width="11" height="11" rx="2"/><rect x="41" y="13" width="11" height="11" rx="2"/>
+    <rect x="13" y="27" width="11" height="11" rx="2"/><rect x="27" y="27" width="11" height="11" rx="2" fill="currentColor" fill-opacity=".28"/><rect x="41" y="27" width="11" height="11" rx="2"/>
+    <rect x="13" y="41" width="11" height="11" rx="2"/><rect x="27" y="41" width="11" height="11" rx="2"/><rect x="41" y="41" width="11" height="11" rx="2"/>
+  </symbol>
+  <symbol id="g-peg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="32" cy="14" r="3.5" fill="currentColor" fill-opacity=".28"/><circle cx="32" cy="23" r="3.5" fill="currentColor" fill-opacity=".28"/>
+    <circle cx="14" cy="32" r="3.5" fill="currentColor" fill-opacity=".28"/><circle cx="23" cy="32" r="3.5" fill="currentColor" fill-opacity=".28"/>
+    <circle cx="32" cy="32" r="3.5"/><circle cx="41" cy="32" r="3.5" fill="currentColor" fill-opacity=".28"/>
+    <circle cx="50" cy="32" r="3.5" fill="currentColor" fill-opacity=".28"/><circle cx="32" cy="41" r="3.5" fill="currentColor" fill-opacity=".28"/>
+    <circle cx="32" cy="50" r="3.5" fill="currentColor" fill-opacity=".28"/>
+  </symbol>
+  <symbol id="g-sea" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 40h32l6-8H24z"/><rect x="28" y="24" width="10" height="8" rx="2"/><path d="M33 24v-6"/>
+    <path d="M10 50q6-4 12 0t12 0 12 0 8 0"/>
+  </symbol>
+  <symbol id="g-reversi" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="25" cy="32" r="11" fill="currentColor" fill-opacity=".28"/><circle cx="40" cy="32" r="11"/>
+    <path d="M20 14l4-4"/><path d="M44 54l-4 4" opacity="0"/>
+  </symbol>
+  <symbol id="g-checkers" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="32" cy="40" rx="15" ry="7"/><path d="M17 40v-8"/><path d="M47 40v-8"/>
+    <ellipse cx="32" cy="32" rx="15" ry="7" fill="currentColor" fill-opacity=".12"/>
+    <path d="M25 20l3 5 4-8 4 8 3-5"/>
+  </symbol>
+  <symbol id="g-bg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="12" y="10" width="40" height="44" rx="4"/>
+    <path d="M18 10l4 16 4-16z" fill="currentColor" fill-opacity=".2"/><path d="M30 10l4 16 4-16z"/><path d="M42 10l4 16 4-16z" fill="currentColor" fill-opacity=".2"/>
+    <path d="M18 54l4-16 4 16z"/><path d="M30 54l4-16 4 16z" fill="currentColor" fill-opacity=".2"/><path d="M42 54l4-16 4 16z"/>
+  </symbol>
+  <symbol id="g-morris" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="14" y="14" width="36" height="36"/><rect x="25" y="25" width="14" height="14"/>
+    <path d="M32 14v11"/><path d="M32 39v11"/><path d="M14 32h11"/><path d="M39 32h11"/>
+    <circle cx="14" cy="14" r="2.5" fill="currentColor" fill-opacity=".4"/><circle cx="50" cy="50" r="2.5" fill="currentColor" fill-opacity=".4"/>
+  </symbol>
+  <symbol id="g-snake" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 10v44"/><path d="M28 10v44"/><path d="M18 20h10"/><path d="M18 32h10"/><path d="M18 44h10"/>
+    <path d="M44 10q8 8 0 16t0 16 0 12"/><circle cx="44" cy="56" r="2.5" fill="currentColor"/>
+  </symbol>
+  <symbol id="g-dice" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="15" y="15" width="34" height="34" rx="7"/>
+    <circle cx="25" cy="25" r="2.5" fill="currentColor"/><circle cx="39" cy="25" r="2.5" fill="currentColor"/>
+    <circle cx="32" cy="32" r="2.5" fill="currentColor"/>
+    <circle cx="25" cy="39" r="2.5" fill="currentColor"/><circle cx="39" cy="39" r="2.5" fill="currentColor"/>
+  </symbol>
+  <symbol id="g-mancala" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="32" cy="32" rx="23" ry="15"/>
+    <circle cx="22" cy="28" r="3"/><circle cx="32" cy="26" r="3"/><circle cx="42" cy="28" r="3"/>
+    <circle cx="22" cy="37" r="3" fill="currentColor" fill-opacity=".28"/><circle cx="32" cy="39" r="3"/><circle cx="42" cy="37" r="3" fill="currentColor" fill-opacity=".28"/>
+  </symbol>
+  <symbol id="g-cat" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="14" y="10" width="28" height="42" rx="4"/>
+    <path d="M20 20h16"/><path d="M20 29h16"/><path d="M20 38h10"/>
+    <circle cx="46" cy="44" r="9"/><path d="M43 47l3-7 3 7"/><path d="M44 45h4"/>
+  </symbol>
+  <symbol id="g-wyr" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="23" cy="27" r="10" fill="currentColor" fill-opacity=".28"/>
+    <circle cx="42" cy="38" r="10"/>
+    <path d="M23 44v8"/><path d="M42 52v4" opacity="0"/><path d="M19 55h9"/>
+  </symbol>
+  <symbol id="g-bingo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="32" cy="28" r="15"/><rect x="26" y="22" width="12" height="12" rx="2"/>
+    <path d="M12 50q20 12 40 0"/>
+  </symbol>
+</svg>
+
+<nav class="bar" aria-label="Site">
+  <div class="wrap bar-in">
+    <a class="wordmark" href="#top">Calm Corner</a>
+    <div class="bar-nav">
+      <a href="#solo">Solo</a>
+      <a href="#together">Together</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap" id="top">
+  <p class="eyebrow">Works offline · No ads</p>
+  <h1>The Calm Corner</h1>
+  <svg class="flourish" viewBox="0 0 420 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M4 9 C98 3 192 11 282 6 S392 4 416 8" stroke="#C96442" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <p class="lead">Twenty-seven gentle games with big, clear pieces — for quiet afternoons and family evenings alike.</p>
+</header>
+
+<main>
+  <section class="wrap" id="solo" aria-labelledby="solo-h">
+    <div class="s-head"><h2 id="solo-h">Quiet puzzles</h2><span class="count">13 games</span></div>
+    <div class="rule"></div>
+    <div class="grid">
+      <a class="tile featured w4" style="--tile:var(--t-mahjong);--art:var(--a-mahjong)" href="games/mahjong/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-mahjong"/></svg>
+        <div class="t-body"><h3>Mahjong</h3>
+        <p>Clear the board by matching pairs of free tiles. Eighty-four layouts and a hint button when you need one.</p>
+        <span class="go">Play mahjong →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-2048);--art:var(--a-2048)" href="games/2048/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-2048"/></svg>
+        <div class="t-body"><h3>2048</h3><p>Slide and join numbers until you reach 2048.</p>
+        <span class="go">Play 2048 →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-memory);--art:var(--a-memory)" href="games/memory/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-memory"/></svg>
+        <div class="t-body"><h3>Memory Match</h3><p>Turn cards and find the matching pairs.</p>
+        <span class="go">Play memory →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-cards);--art:var(--a-cards)" href="games/solitaire/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-cards"/></svg>
+        <div class="t-body"><h3>Solitaire</h3><p>The classic Klondike patience, one card at a time.</p>
+        <span class="go">Play solitaire →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-mines);--art:var(--a-mines)" href="games/minesweeper/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-mines"/></svg>
+        <div class="t-body"><h3>Minesweeper</h3><p>Use the number clues to flag every hidden mine.</p>
+        <span class="go">Play minesweeper →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-words);--art:var(--a-words)" href="games/scramble/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-scramble"/></svg>
+        <div class="t-body"><h3>Word Scramble</h3><p>Untangle the letters back into a word.</p>
+        <span class="go">Play scramble →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-chess);--art:var(--a-chess)" href="games/15puzzle/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-15"/></svg>
+        <div class="t-body"><h3>15-Puzzle</h3><p>Slide the tiles back into order.</p>
+        <span class="go">Play 15-puzzle →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-wood);--art:var(--a-wood)" href="games/sokoban/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-crate"/></svg>
+        <div class="t-body"><h3>Sokoban</h3><p>Push every crate onto its mark.</p>
+        <span class="go">Play sokoban →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-imp);--art:var(--a-imp)" href="games/lights-out/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-lights"/></svg>
+        <div class="t-body"><h3>Lights Out</h3><p>Switch off every light on the grid.</p>
+        <span class="go">Play lights out →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-char);--art:var(--a-char)" href="games/wordsearch/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-search"/></svg>
+        <div class="t-body"><h3>Word Search</h3><p>Find the hidden words across the letter grid.</p>
+        <span class="go">Play word search →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-mahjong);--art:var(--a-mahjong)" href="games/peg-solitaire/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-peg"/></svg>
+        <div class="t-body"><h3>Peg Solitaire</h3><p>Jump pegs until only one remains.</p>
+        <span class="go">Play pegs →</span></div></a>
+      <a class="tile w3" style="--tile:var(--t-memory);--art:var(--a-memory)" href="games/reversi/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-reversi"/></svg>
+        <div class="t-body"><h3>Reversi</h3><p>Flip the board to your color against the computer.</p>
+        <span class="go">Play reversi →</span></div></a>
+      <a class="tile w3" style="--tile:var(--t-sea);--art:var(--a-sea)" href="games/battleship/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-sea"/></svg>
+        <div class="t-body"><h3>Sea Battle</h3><p>Find the hidden fleet, shot by shot.</p>
+        <span class="go">Play sea battle →</span></div></a>
+    </div>
+  </section>
+
+  <section class="wrap" id="together" aria-labelledby="together-h">
+    <div class="s-head"><h2 id="together-h">Games for company</h2><span class="count">14 games</span></div>
+    <div class="rule"></div>
+    <div class="grid">
+      <a class="tile featured w4" style="--tile:var(--t-chess);--art:var(--a-chess)" href="games/chess/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-chess"/></svg>
+        <div class="t-body"><h3>Chess</h3>
+        <p>The classic game on one screen — pass the mouse, take your time, and settle it like gentlefolk.</p>
+        <span class="meta">2 players · one screen</span>
+        <span class="go">Play chess →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-2048);--art:var(--a-2048)" href="games/connect4/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-c4"/></svg>
+        <div class="t-body"><h3>Connect Four</h3><p>Drop discs, make four in a row.</p>
+        <span class="meta">2 players · one screen</span>
+        <span class="go">Play connect four →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-char);--art:var(--a-char)" href="games/charades/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-mask"/></svg>
+        <div class="t-body"><h3>Charades</h3><p>Act out the word — no talking allowed.</p>
+        <span class="meta">4+ players · one phone</span>
+        <span class="go">Start acting →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-cards);--art:var(--a-cards)" href="games/checkers/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-checkers"/></svg>
+        <div class="t-body"><h3>Checkers</h3><p>March, jump, and crown your kings.</p>
+        <span class="meta">2 players · one screen</span>
+        <span class="go">Play checkers →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-wood);--art:var(--a-wood)" href="games/backgammon/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-bg"/></svg>
+        <div class="t-body"><h3>Backgammon</h3><p>The ancient race around the board.</p>
+        <span class="meta">2 players · one screen</span>
+        <span class="go">Play backgammon →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-draw);--art:var(--a-draw)" href="games/draw-guess/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-pencil"/></svg>
+        <div class="t-body"><h3>Draw &amp; Guess</h3><p>Draw the word on paper while your team guesses.</p>
+        <span class="meta">4+ players · paper &amp; pencil</span>
+        <span class="go">Start drawing →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-mahjong);--art:var(--a-mahjong)" href="games/nine-mens-morris/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-morris"/></svg>
+        <div class="t-body"><h3>Nine Men's Morris</h3><p>Form mills, take their pieces.</p>
+        <span class="meta">2 players · one screen</span>
+        <span class="go">Play morris →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-snake);--art:var(--a-snake)" href="games/snakes-and-ladders/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-snake"/></svg>
+        <div class="t-body"><h3>Snakes &amp; Ladders</h3><p>Climb up, slide down, race to the top.</p>
+        <span class="meta">2 players · one screen</span>
+        <span class="go">Play snakes &amp; ladders →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-dice);--art:var(--a-dice)" href="games/yahtzee/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-dice"/></svg>
+        <div class="t-body"><h3>Yacht Dice</h3><p>Five dice, thirteen ways to score.</p>
+        <span class="meta">2 players · take turns</span>
+        <span class="go">Play yacht dice →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-imp);--art:var(--a-imp)" href="games/impostor/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-spy"/></svg>
+        <div class="t-body"><h3>The Impostor</h3><p>Everyone gets the secret word — except one. Find them.</p>
+        <span class="meta">3–12 players · one phone</span>
+        <span class="go">Deal roles →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-mines);--art:var(--a-mines)" href="games/mancala/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-mancala"/></svg>
+        <div class="t-body"><h3>Mancala</h3><p>Sow the stones, capture the most.</p>
+        <span class="meta">2 players · one screen</span>
+        <span class="go">Play mancala →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-words);--art:var(--a-words)" href="games/categories/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-cat"/></svg>
+        <div class="t-body"><h3>Categories</h3><p>One letter, quick pens, unique answers win.</p>
+        <span class="meta">3+ players · paper &amp; pencil</span>
+        <span class="go">Start a round →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-rose);--art:var(--a-rose)" href="games/would-you-rather/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-wyr"/></svg>
+        <div class="t-body"><h3>Would You Rather</h3><p>Pick a side and defend it.</p>
+        <span class="meta">3+ players · one phone</span>
+        <span class="go">Ask away →</span></div></a>
+      <a class="tile w2" style="--tile:var(--t-dice);--art:var(--a-dice)" href="games/bingo/">
+        <svg class="glyph" aria-hidden="true"><use href="#g-bingo"/></svg>
+        <div class="t-body"><h3>Bingo Caller</h3><p>Your living-room bingo night, called for you.</p>
+        <span class="meta">Any group · paper cards</span>
+        <span class="go">Start calling →</span></div></a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h2>Credits &amp; licenses</h2>
+    <ul>
+      <li>Mahjong — <a href="https://github.com/ffalt/mah">ffalt/mah</a> (MIT)</li>
+      <li>2048 — <a href="https://github.com/gabrielecirulli/2048">gabrielecirulli/2048</a> (MIT)</li>
+      <li>Memory Match — <a href="https://github.com/mmenavas/memory-game">mmenavas/memory-game</a> (MIT)</li>
+      <li>Solitaire — <a href="https://github.com/jhatzimalis/solitaire">jhatzimalis/solitaire</a> (MIT)</li>
+      <li>Minesweeper — <a href="https://github.com/michaelbutler/minesweeper">michaelbutler/minesweeper</a> (GPL-3.0)</li>
+      <li>Word Scramble — <a href="https://github.com/jeskodes/word-scramble">jeskodes/word-scramble</a> (MIT)</li>
+      <li>15-Puzzle — <a href="https://github.com/krishealty/puzzle">krishealty/puzzle</a> (MIT)</li>
+      <li>Sokoban — <a href="https://github.com/omerkel/Sokoban">omerkel/Sokoban</a> (code MIT; graphics CC BY-NC-SA 4.0 — non-commercial)</li>
+      <li>Lights Out — <a href="https://github.com/alex-berson/lights-out">alex-berson/lights-out</a> (MIT)</li>
+      <li>Word Search — <a href="https://github.com/bunkat/wordfind">bunkat/wordfind</a> (MIT)</li>
+      <li>Peg Solitaire — <a href="https://github.com/alex-berson/solitaire">alex-berson/solitaire</a> (MIT)</li>
+      <li>Reversi — <a href="https://github.com/alex-berson/reversi">alex-berson/reversi</a> (MIT)</li>
+      <li>Sea Battle — <a href="https://github.com/billmei/battleboat">billmei/battleboat</a> (MIT)</li>
+      <li>Chess — <a href="https://github.com/kbjorklu/chess">kbjorklu/chess</a> (MIT)</li>
+      <li>Connect Four — <a href="https://github.com/STiago/connect-4">STiago/connect-4</a> (GPL-3.0)</li>
+      <li>Checkers — <a href="https://github.com/codethejason/checkers">codethejason/checkers</a> (GPL-2.0)</li>
+      <li>Backgammon — <a href="https://github.com/99fk/backgammon-html">99fk/backgammon-html</a> (GPL-3.0)</li>
+      <li>Nine Men's Morris — <a href="https://github.com/yadav-rahul/Nine-Mens-Morris">yadav-rahul/Nine-Mens-Morris</a> (MIT)</li>
+      <li>Snakes &amp; Ladders — <a href="https://github.com/hkasera/snakes-and-ladders">hkasera/snakes-and-ladders</a> (MIT)</li>
+      <li>Yacht Dice — <a href="https://github.com/99fk/yahtzee-html">99fk/yahtzee-html</a> (GPL-3.0)</li>
+      <li>Mancala — <a href="https://github.com/intel/webapps-mancala">intel/webapps-mancala</a> (Apache-2.0)</li>
+      <li>Charades, Draw &amp; Guess, The Impostor, Categories, Would You Rather, Bingo Caller — original Calm Corner mini-games (MIT)</li>
+    </ul>
+    <p>Each game keeps its original license file in its folder; local modifications (offline vendoring, lobby button) are noted in CREDITS.md. This bundle's source is public.</p>
+    <p style="margin-top:20px"><a class="btn" href="__ISSUES_URL__">Send feedback</a></p>
+  </div>
+</footer>
+</body>
+</html>

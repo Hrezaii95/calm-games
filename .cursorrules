@@ -1,0 +1,13 @@
+# Execution rules — Calm Corner bundle
+
+You are executing CURSOR-PROMPT.md in this folder. It is a pre-decided, pre-researched plan.
+
+1. Follow CURSOR-PROMPT.md literally, phases in order. No redesigns, no extra dependencies, no repos beyond the six listed (ffalt/mah, gabrielecirulli/2048, mmenavas/memory-game, michaelbutler/minesweeper, bunkat/wordfind, kbjorklu/chess).
+2. The hub (index.html), DESIGN-SPEC.md, and games/charades, games/draw-guess, games/impostor are FINISHED. Do not recreate, restyle, or "improve" them. Only permitted edits there: remove cards/credits of dropped games; replace __ISSUES_URL__.
+3. Timeboxes are binding: a fetched game that exceeds its fix budget gets dropped (delete folder + remove hub card + credits line + note in SHIP-REPORT.md). Ship what works.
+4. Never modify or remove upstream LICENSE files. Only permitted in-game edits: mahjong <base href> fix, chess.html -> index.html rename, and the Lobby-button snippet.
+5. Any visual work follows DESIGN-SPEC.md tokens exactly. No new colors, fonts, or spacing values.
+6. Shell is Windows PowerShell. The repo root is the website root.
+7. Log every test result in TESTLOG.md and every deviation in SHIP-REPORT.md.
+8. Do not mention "Vita" anywhere in the product or repo.
+9. Definition of done: live GitHub Pages URL, >=7 playable games, credits complete, SHIP-REPORT.md written. Then stop.

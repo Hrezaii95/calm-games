@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Impostor — The Calm Corner</title>
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+:root{
+  --bg:#1E1B18;
+  --text:#F0E9DE;
+  --muted:#A89F91;
+  --line:rgba(240,233,222,.14);
+  --line-strong:rgba(240,233,222,.34);
+  --clay:#C96442;
+  --sand:#FBF7F0;
+  --ink-on-sand:#26221E;
+  --a-imp:#D4B45A;
+  --r-tile:14px; --r-ui:8px;
+  --dur:220ms; --ease:cubic-bezier(.2,.7,.3,1);
+  --serif: Fraunces, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans:  Nunito, "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:400 20px/1.6 var(--sans);
+  min-height:100vh;
+}
+.wrap{max-width:720px;margin:0 auto;padding:24px 24px 120px;text-align:center}
+.eyebrow{font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:14px;color:var(--a-imp)}
+h1{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(40px,8vw,64px);line-height:.98;margin:10px 0 8px;color:var(--text)}
+.sub{color:var(--muted);font-size:20px;max-width:46ch;margin:0 auto 26px}
+.stage{position:relative;background:var(--sand);border:1.5px solid var(--line-strong);border-radius:var(--r-tile);
+  padding:48px 24px;margin-bottom:22px;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:14px;color:var(--ink-on-sand)}
+.big{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(36px,8vw,58px);line-height:1.12;color:var(--ink-on-sand)}
+.mid{color:#5C594E;font-size:19px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:8px}
+.chip{font:600 20px var(--sans);color:var(--text);background:transparent;border:1.5px solid var(--line);
+  border-radius:var(--r-ui);min-width:58px;min-height:52px;cursor:pointer;transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.chip[aria-pressed="true"]{background:var(--clay);border-color:var(--clay);color:#FFF7F2;font-weight:700}
+.chip:focus-visible,.btn:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+.btn{display:inline-block;background:var(--clay);color:#FFF7F2;border:0;font:700 20px var(--sans);
+  padding:18px 34px;min-height:56px;border-radius:999px;cursor:pointer;width:100%;max-width:360px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.1)}
+.hidden{display:none}
+.lobby{position:fixed;left:16px;bottom:16px;z-index:99999;background:rgba(30,27,24,.92);color:#F0E9DE;
+  font:700 17px/1 system-ui;padding:14px 18px;border-radius:999px;text-decoration:none;
+  border:1.5px solid rgba(240,233,222,.34);min-height:48px;display:inline-flex;align-items:center}
+.lobby:focus-visible{outline:3px solid var(--clay);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.chip,.btn{transition:none}}
+@media (prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">Play together · 3–12 players · one phone</p>
+  <h1>The Impostor</h1>
+  <p class="sub">Everyone secretly sees the same word — except one impostor. Take turns describing the word with a single vague clue, then vote on who was bluffing.</p>
+
+  <div id="setup">
+    <p class="mid" style="margin-bottom:10px;color:var(--muted)">How many players?</p>
+    <div class="chips" id="counts" role="group" aria-label="Number of players"></div>
+    <button class="btn" id="start">Deal the roles</button>
+  </div>
+
+  <div id="reveal" class="hidden">
+    <div class="stage">
+      <div class="big" id="who">Player 1</div>
+      <div class="mid" id="prompt">Take the phone. Tap below when nobody else can see the screen.</div>
+      <div class="big hidden" id="secret"></div>
+      <div class="mid hidden" id="tip"></div>
+    </div>
+    <button class="btn" id="revealBtn">Show my role</button>
+  </div>
+
+  <div id="discuss" class="hidden">
+    <div class="stage">
+      <div class="big">Time to talk</div>
+      <div class="mid">Go around the circle — everyone gives one short clue about the word. Too obvious helps the impostor; too vague makes YOU look guilty. Then vote.</div>
+      <div class="big hidden" id="answer"></div>
+    </div>
+    <button class="btn" id="showBtn">Reveal the impostor</button>
+    <p style="margin-top:14px"><button class="btn" id="again" style="background:transparent;border:1.5px solid var(--line-strong);color:var(--text)">Play again</button></p>
+  </div>
+</main>
+<a class="lobby" href="../../index.html#games">⌂ Lobby</a>
+
+<script>
+"use strict";
+const WORDS = ["Kitchen","Bus stop","Wedding","Doctor","Camping","Birthday","Barber shop","Rain","Tea","Garden","Hospital","Beach","Winter","Bread","Football","School","Moon","Taxi","Picnic","Pharmacy","Mirror","Neighbor","Market","Mountain","Watermelon","Photograph","Suitcase","Bees","Library","Breakfast","Carpet","Window","Cinema","Soup","Bicycle","Newspaper","Fireworks","Elevator","Umbrella","Orchard","Clock tower","Rooftop","Ferry","Bakery","Chess club","Waterfall","Post office","Train ride"];
+
+const counts = document.getElementById("counts");
+let players = 5;
+for (let n = 3; n <= 12; n++) {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = n;
+  b.setAttribute("aria-pressed", String(n === players));
+  b.addEventListener("click", () => {
+    players = n;
+    for (const c of counts.children) c.setAttribute("aria-pressed", "false");
+    b.setAttribute("aria-pressed", "true");
+  });
+  counts.appendChild(b);
+}
+
+const setup = document.getElementById("setup"), reveal = document.getElementById("reveal"),
+      discuss = document.getElementById("discuss"), who = document.getElementById("who"),
+      prompt = document.getElementById("prompt"), secret = document.getElementById("secret"),
+      tip = document.getElementById("tip"), revealBtn = document.getElementById("revealBtn"),
+      answer = document.getElementById("answer");
+
+let word = "", impostor = 0, current = 1, shown = false;
+
+document.getElementById("start").addEventListener("click", () => {
+  word = WORDS[Math.floor(Math.random() * WORDS.length)];
+  impostor = 1 + Math.floor(Math.random() * players);
+  current = 1; shown = false;
+  setup.classList.add("hidden"); reveal.classList.remove("hidden");
+  paint();
+});
+
+function paint() {
+  who.textContent = "Player " + current;
+  prompt.textContent = "Take the phone. Tap below when nobody else can see the screen.";
+  prompt.classList.remove("hidden");
+  secret.classList.add("hidden"); tip.classList.add("hidden");
+  revealBtn.textContent = "Show my role";
+}
+
+revealBtn.addEventListener("click", () => {
+  if (!shown) {
+    shown = true;
+    prompt.classList.add("hidden");
+    secret.classList.remove("hidden"); tip.classList.remove("hidden");
+    if (current === impostor) {
+      secret.textContent = "You are the Impostor";
+      tip.textContent = "You don't know the word. Listen carefully and bluff.";
+    } else {
+      secret.textContent = word;
+      tip.textContent = "Remember it. Don't say it out loud.";
+    }
+    revealBtn.textContent = current < players ? "Hide & pass the phone" : "Everyone is ready";
+  } else {
+    shown = false;
+    if (current < players) { current++; paint(); }
+    else { reveal.classList.add("hidden"); discuss.classList.remove("hidden"); }
+  }
+});
+
+document.getElementById("showBtn").addEventListener("click", () => {
+  answer.textContent = "Player " + impostor + " was the impostor. The word was “" + word + "”.";
+  answer.classList.remove("hidden");
+});
+document.getElementById("again").addEventListener("click", () => {
+  discuss.classList.add("hidden");
+  answer.classList.add("hidden"); answer.textContent = "";
+  setup.classList.remove("hidden");
+});
+</script>
+</body>
+</html>
